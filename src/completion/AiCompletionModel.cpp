@@ -26,10 +26,12 @@ void AiCompletionModel::completionInvoked(KTextEditor::View *view, const KTextEd
     m_currentView = view;
     m_currentRange = range;
     
+    beginResetModel();
     m_completions.clear();
-    setRowCount(0);
+    m_completions.append(QStringLiteral("Generating AI Suggestion..."));
+    setRowCount(1);
     m_isWaiting = true;
-    Q_EMIT waitForReset();
+    endResetModel();
 
     // ##Condition purpose: Abort if the view or document is invalid.
     if (!view || !view->document()) return;
@@ -49,14 +51,17 @@ void AiCompletionModel::completionInvoked(KTextEditor::View *view, const KTextEd
 void AiCompletionModel::onCompletionReceived(const QString &text)
 {
     m_isWaiting = false;
+    
+    beginResetModel();
     m_completions.clear();
     
     if (!text.isEmpty() && m_currentView) {
         m_completions.append(text);
+        setRowCount(1);
+    } else {
+        setRowCount(0);
     }
     
-    setRowCount(m_completions.count());
-    beginResetModel();
     endResetModel();
 }
 

@@ -1,14 +1,14 @@
 # Decisions Log
 
-**Timestamp**: 2026-07-02 15:14
+**Timestamp**: 2026-07-02 15:21
 
 ## Architecture: Reference Replication
 * **Decision**: Extract `CommandTextEdit` into `AiChatInputWidget` and implement context menu hooks instead of deleting original classes or force-swapping whole codebases.
 * **Justification**: Dumping an external repo into our project breaks FOSS rules and introduces massive tech debt. Integrating their UI logic (e.g. `@file` mentions and right-click menus) into our native classes preserves our clean `QNetworkAccessManager` backend and guarantees separation of concerns.
 
 ## UI: Code Completion Crash Fixes
-* **Decision**: Replace `beginResetModel()` with safe `beginInsertRows()` and `beginRemoveRows()` in `AiCompletionModel`. Implement `MatchRole`.
-* **Justification**: Calling `beginResetModel()` during asynchronous LLM streams aggressively destroys KTextEditor's internal UI delegates. When typing quickly, this causes Kate to segfault because the popup view is actively attempting to redraw invalidated memory. Furthermore, KTextEditor requires precise data filtering via `MatchRole` to prevent internal crashes.
+* **Decision**: Remove manual `rowCount()` overrides. Rely strictly on KTextEditor's `setRowCount()` API natively synchronized with `beginResetModel()`.
+* **Justification**: KTextEditor's base `CodeCompletionModel` utilizes complex internal Qt tree-structures based around its own internal `d->rowCount` pointer. Overriding the `rowCount()` function without using `setRowCount()` causes a severe data de-synchronization where KTextEditor attempts to iterate over internal arrays that have size 0 while the override falsely reports size 1, leading to immediate recursion loops and segmentation faults during UI rendering. Wrapping `m_completions` changes inside `beginResetModel()` completely stabilizes it.
 
 **Timestamp**: 2026-07-02 14:43
 
