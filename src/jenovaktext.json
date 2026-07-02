@@ -1,0 +1,16 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Antigravity AI"
+            }
+        ],
+        "Category": "Editor",
+        "Description": "Jenova AI Assistant for KTextEditor",
+        "Icon": "code-context",
+        "Id": "jenovaktext",
+        "License": "MIT",
+        "Name": "Jenova K Text",
+        "Version": "1.0.0"
+    }
+}
