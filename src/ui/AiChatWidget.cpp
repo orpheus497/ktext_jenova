@@ -1,18 +1,17 @@
 // ##Script function and purpose: Implements the UI layout and event handling for the chat widget, including SSE chunking.
 #include "AiChatWidget.h"
+#include "AiChatInputWidget.h"
 #include "../network/LlamaClient.h"
 #include "../context/ContextManager.h"
 
 #include <KTextEditor/MainWindow>
 #include <KTextEditor/View>
 #include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QTextBrowser>
-#include <QTextEdit>
-#include <QPushButton>
 #include <QJsonObject>
 #include <QEvent>
 #include <QKeyEvent>
+#include <KTextEditor/Document>
 
 // ##Method purpose: Sets up the layout, initializes UI components, and connects signals.
 AiChatWidget::AiChatWidget(KTextEditor::MainWindow *mainWindow, QWidget *parent)
@@ -29,26 +28,12 @@ AiChatWidget::AiChatWidget(KTextEditor::MainWindow *mainWindow, QWidget *parent)
     m_chatHistory->setFrameStyle(QFrame::NoFrame);
     layout->addWidget(m_chatHistory);
     
-    auto *inputLayout = new QHBoxLayout();
-    inputLayout->setContentsMargins(4, 4, 4, 4);
+    m_inputWidget = new AiChatInputWidget(this);
+    layout->addWidget(m_inputWidget);
     
-    m_inputBox = new QTextEdit(this);
-    m_inputBox->installEventFilter(this);
-    m_inputBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    m_inputBox->setMaximumHeight(80);
-    m_inputBox->setMinimumHeight(40);
-    inputLayout->addWidget(m_inputBox);
+    connect(m_inputWidget, &AiChatInputWidget::messageSubmitted, this, &AiChatWidget::sendMessage);
+    connect(m_inputWidget, &AiChatInputWidget::newChatClicked, this, &AiChatWidget::clearChat);
     
-    m_sendButton = new QPushButton(QStringLiteral("Send"), this);
-    inputLayout->addWidget(m_sendButton);
-    
-    m_newChatButton = new QPushButton(QStringLiteral("New Chat"), this);
-    inputLayout->addWidget(m_newChatButton);
-    
-    layout->addLayout(inputLayout);
-    
-    connect(m_sendButton, &QPushButton::clicked, this, &AiChatWidget::sendMessage);
-    connect(m_newChatButton, &QPushButton::clicked, this, &AiChatWidget::clearChat);
     connect(m_client, &LlamaClient::chatTokenReceived, this, &AiChatWidget::onChatTokenReceived);
     connect(m_client, &LlamaClient::chatResponseFinished, this, &AiChatWidget::onChatFinished);
     connect(m_client, &LlamaClient::errorOccurred, this, &AiChatWidget::onError);
@@ -57,30 +42,17 @@ AiChatWidget::AiChatWidget(KTextEditor::MainWindow *mainWindow, QWidget *parent)
     clearChat();
 }
 
-// ##Method purpose: Intercepts Enter key events on the input box to send the message.
+// (eventFilter removed because AiChatInputWidget handles its own input keys now)
 bool AiChatWidget::eventFilter(QObject *watched, QEvent *event)
 {
-    if (watched == m_inputBox && event->type() == QEvent::KeyPress) {
-        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter) {
-            if (!(keyEvent->modifiers() & Qt::ShiftModifier)) {
-                sendMessage();
-                return true;
-            }
-        }
-    }
     return QWidget::eventFilter(watched, event);
 }
 
 // ##Method purpose: Reads user input, builds the JSON message history, and starts the stream.
-void AiChatWidget::sendMessage()
+void AiChatWidget::sendMessage(const QString &text)
 {
-    QString text = m_inputBox->toPlainText().trimmed();
-    
-    // ##Condition purpose: Prevent sending empty messages.
     if (text.isEmpty()) return;
     
-    m_inputBox->clear();
     m_rawMarkdown += QStringLiteral("**You:**\n\n") + text + QStringLiteral("\n\n---\n\n**AI:**\n\n");
     renderMarkdown();
     
@@ -99,7 +71,7 @@ void AiChatWidget::sendMessage()
     m_messageHistory.append(userMsg);
     
     m_currentAssistantResponse.clear();
-    m_sendButton->setEnabled(false);
+    m_inputWidget->setPromptRunning(true);
     m_client->requestChat(m_messageHistory);
 }
 
@@ -114,7 +86,7 @@ void AiChatWidget::onChatTokenReceived(const QString &token)
 // ##Method purpose: Triggered when the AI finishes responding, finalizing the message block.
 void AiChatWidget::onChatFinished()
 {
-    m_sendButton->setEnabled(true);
+    m_inputWidget->setPromptRunning(false);
     
     QJsonObject assistantMsg;
     assistantMsg[QStringLiteral("role")] = QStringLiteral("assistant");
@@ -128,7 +100,7 @@ void AiChatWidget::onChatFinished()
 // ##Method purpose: Displays a network or parsing error in the chat log.
 void AiChatWidget::onError(const QString &error)
 {
-    m_sendButton->setEnabled(true);
+    m_inputWidget->setPromptRunning(false);
     m_rawMarkdown += QStringLiteral("\n\n**Error:** `") + error + QStringLiteral("`\n\n---\n\n");
     renderMarkdown();
 }

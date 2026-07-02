@@ -41,6 +41,7 @@ template <> constexpr inline auto AiChatWidget::qt_create_metaobjectdata<qt_meta
         "AiChatWidget",
         "sendMessage",
         "",
+        "text",
         "onChatTokenReceived",
         "token",
         "onChatFinished",
@@ -51,19 +52,21 @@ template <> constexpr inline auto AiChatWidget::qt_create_metaobjectdata<qt_meta
 
     QtMocHelpers::UintData qt_methods {
         // Slot 'sendMessage'
-        QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void(const QString &)>(1, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::QString, 3 },
+        }}),
         // Slot 'onChatTokenReceived'
-        QtMocHelpers::SlotData<void(const QString &)>(3, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::QString, 4 },
+        QtMocHelpers::SlotData<void(const QString &)>(4, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::QString, 5 },
         }}),
         // Slot 'onChatFinished'
-        QtMocHelpers::SlotData<void()>(5, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(6, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'onError'
-        QtMocHelpers::SlotData<void(const QString &)>(6, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::QString, 7 },
+        QtMocHelpers::SlotData<void(const QString &)>(7, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::QString, 8 },
         }}),
         // Slot 'clearChat'
-        QtMocHelpers::SlotData<void()>(8, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(9, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -87,7 +90,7 @@ void AiChatWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
     auto *_t = static_cast<AiChatWidget *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: _t->sendMessage(); break;
+        case 0: _t->sendMessage((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
         case 1: _t->onChatTokenReceived((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
         case 2: _t->onChatFinished(); break;
         case 3: _t->onError((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;

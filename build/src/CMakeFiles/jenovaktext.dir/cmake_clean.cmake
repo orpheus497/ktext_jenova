@@ -18,6 +18,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/jenovaktext.dir/plugin/AiPlugin.cpp.o.d"
   "CMakeFiles/jenovaktext.dir/plugin/AiPluginView.cpp.o"
   "CMakeFiles/jenovaktext.dir/plugin/AiPluginView.cpp.o.d"
+  "CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.o"
+  "CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.o.d"
   "CMakeFiles/jenovaktext.dir/ui/AiChatWidget.cpp.o"
   "CMakeFiles/jenovaktext.dir/ui/AiChatWidget.cpp.o.d"
   "jenovaktext_autogen/mocs_compilation.cpp"

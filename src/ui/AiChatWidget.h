@@ -5,7 +5,7 @@
 #include <QJsonArray>
 
 class QTextBrowser;
-class QTextEdit;
+class AiChatInputWidget;
 class QPushButton;
 class QVBoxLayout;
 class LlamaClient;
@@ -28,7 +28,7 @@ protected:
 
 private Q_SLOTS:
     // ##Method purpose: Triggered when the user clicks Send; packages the message.
-    void sendMessage();
+    void sendMessage(const QString &text);
     
     // ##Method purpose: Triggered when a new token arrives from the SSE stream.
     void onChatTokenReceived(const QString &token);
@@ -48,7 +48,7 @@ private:
     
     KTextEditor::MainWindow *m_mainWindow;
     QTextBrowser *m_chatHistory;
-    QTextEdit *m_inputBox;
+    AiChatInputWidget *m_inputWidget;
     QPushButton *m_sendButton;
     QPushButton *m_newChatButton;
     

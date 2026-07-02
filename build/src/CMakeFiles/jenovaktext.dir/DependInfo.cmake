@@ -16,6 +16,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/orpheus497/Documents/Projects/ktext_jenova/src/network/LlamaClient.cpp" "src/CMakeFiles/jenovaktext.dir/network/LlamaClient.cpp.o" "gcc" "src/CMakeFiles/jenovaktext.dir/network/LlamaClient.cpp.o.d"
   "/home/orpheus497/Documents/Projects/ktext_jenova/src/plugin/AiPlugin.cpp" "src/CMakeFiles/jenovaktext.dir/plugin/AiPlugin.cpp.o" "gcc" "src/CMakeFiles/jenovaktext.dir/plugin/AiPlugin.cpp.o.d"
   "/home/orpheus497/Documents/Projects/ktext_jenova/src/plugin/AiPluginView.cpp" "src/CMakeFiles/jenovaktext.dir/plugin/AiPluginView.cpp.o" "gcc" "src/CMakeFiles/jenovaktext.dir/plugin/AiPluginView.cpp.o.d"
+  "/home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatInputWidget.cpp" "src/CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.o" "gcc" "src/CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.o.d"
   "/home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatWidget.cpp" "src/CMakeFiles/jenovaktext.dir/ui/AiChatWidget.cpp.o" "gcc" "src/CMakeFiles/jenovaktext.dir/ui/AiChatWidget.cpp.o.d"
   )
 

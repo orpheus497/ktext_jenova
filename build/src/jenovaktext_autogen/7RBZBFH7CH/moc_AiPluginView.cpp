@@ -44,6 +44,9 @@ template <> constexpr inline auto AiPluginView::qt_create_metaobjectdata<qt_meta
         "KTextEditor::View*",
         "view",
         "requestAiRefactor",
+        "onContextMenuAboutToShow",
+        "QMenu*",
+        "menu",
         "onRefactorReceived",
         "text"
     };
@@ -55,9 +58,13 @@ template <> constexpr inline auto AiPluginView::qt_create_metaobjectdata<qt_meta
         }}),
         // Slot 'requestAiRefactor'
         QtMocHelpers::SlotData<void()>(5, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onContextMenuAboutToShow'
+        QtMocHelpers::SlotData<void(KTextEditor::View *, QMenu *)>(6, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { 0x80000000 | 3, 4 }, { 0x80000000 | 7, 8 },
+        }}),
         // Slot 'onRefactorReceived'
-        QtMocHelpers::SlotData<void(const QString &)>(6, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::QString, 7 },
+        QtMocHelpers::SlotData<void(const QString &)>(9, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::QString, 10 },
         }}),
     };
     QtMocHelpers::UintData qt_properties {
@@ -84,7 +91,8 @@ void AiPluginView::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
         switch (_id) {
         case 0: _t->onActiveViewChanged((*reinterpret_cast<std::add_pointer_t<KTextEditor::View*>>(_a[1]))); break;
         case 1: _t->requestAiRefactor(); break;
-        case 2: _t->onRefactorReceived((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
+        case 2: _t->onContextMenuAboutToShow((*reinterpret_cast<std::add_pointer_t<KTextEditor::View*>>(_a[1])),(*reinterpret_cast<std::add_pointer_t<QMenu*>>(_a[2]))); break;
+        case 3: _t->onRefactorReceived((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
         default: ;
         }
     }
@@ -96,6 +104,15 @@ void AiPluginView::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
             default: *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType(); break;
             case 0:
                 *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType::fromType< KTextEditor::View* >(); break;
+            }
+            break;
+        case 2:
+            switch (*reinterpret_cast<int*>(_a[1])) {
+            default: *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType(); break;
+            case 0:
+                *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType::fromType< KTextEditor::View* >(); break;
+            case 1:
+                *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType::fromType< QMenu* >(); break;
             }
             break;
         }
@@ -123,14 +140,14 @@ int AiPluginView::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 3)
+        if (_id < 4)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 3;
+        _id -= 4;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 3)
+        if (_id < 4)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 3;
+        _id -= 4;
     }
     return _id;
 }

@@ -12,8 +12,9 @@ AiCompletionModel::AiCompletionModel(QObject *parent)
     connect(m_client, &LlamaClient::completionReceived, this, &AiCompletionModel::onCompletionReceived);
     connect(m_client, &LlamaClient::errorOccurred, this, [this]() {
         m_isWaiting = false;
-        beginResetModel();
         m_completions.clear();
+        setRowCount(0);
+        beginResetModel();
         endResetModel();
     });
 }
@@ -25,11 +26,10 @@ void AiCompletionModel::completionInvoked(KTextEditor::View *view, const KTextEd
     m_currentView = view;
     m_currentRange = range;
     
-    beginResetModel();
     m_completions.clear();
-    m_completions.append(QStringLiteral("Generating AI Suggestion..."));
+    setRowCount(0);
     m_isWaiting = true;
-    endResetModel();
+    Q_EMIT waitForReset();
 
     // ##Condition purpose: Abort if the view or document is invalid.
     if (!view || !view->document()) return;
@@ -49,22 +49,15 @@ void AiCompletionModel::completionInvoked(KTextEditor::View *view, const KTextEd
 void AiCompletionModel::onCompletionReceived(const QString &text)
 {
     m_isWaiting = false;
-    
-    beginResetModel();
     m_completions.clear();
     
     if (!text.isEmpty() && m_currentView) {
         m_completions.append(text);
     }
+    
+    setRowCount(m_completions.count());
+    beginResetModel();
     endResetModel();
-}
-
-// ##Method purpose: Required Qt model override; returns the list size.
-int AiCompletionModel::rowCount(const QModelIndex &parent) const
-{
-    // ##Condition purpose: We do not support nested trees.
-    if (parent.isValid()) return 0;
-    return m_completions.count();
 }
 
 // ##Method purpose: Provides the completion string to the editor for the Name column.
@@ -76,6 +69,8 @@ QVariant AiCompletionModel::data(const QModelIndex &index, int role) const
     if (role == Qt::DisplayRole || role == KTextEditor::CodeCompletionModel::CompletionRole) {
         if (index.column() == KTextEditor::CodeCompletionModel::Name) {
             QString fullText = m_completions.at(index.row());
+            
+            // DisplayRole can show a preview
             QString preview = fullText.split(QLatin1Char('\n')).first();
             if (fullText.contains(QLatin1Char('\n'))) {
                 preview += QStringLiteral(" ...");

@@ -16,6 +16,8 @@ src/jenovaktext_autogen/timestamp: src/jenovaktext_autogen/moc_predefs.h \
   /home/orpheus497/Documents/Projects/ktext_jenova/src/plugin/AiPlugin.h \
   /home/orpheus497/Documents/Projects/ktext_jenova/src/plugin/AiPluginView.cpp \
   /home/orpheus497/Documents/Projects/ktext_jenova/src/plugin/AiPluginView.h \
+  /home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatInputWidget.cpp \
+  /home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatInputWidget.h \
   /home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatWidget.cpp \
   /home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatWidget.h \
   /usr/bin/cmake \
@@ -553,6 +555,8 @@ src/jenovaktext_autogen/timestamp: src/jenovaktext_autogen/moc_predefs.h \
   /usr/include/qt6/QtGui/qregion.h \
   /usr/include/qt6/QtGui/qrgb.h \
   /usr/include/qt6/QtGui/qrgba64.h \
+  /usr/include/qt6/QtGui/qtextcursor.h \
+  /usr/include/qt6/QtGui/qtextdocument.h \
   /usr/include/qt6/QtGui/qtextformat.h \
   /usr/include/qt6/QtGui/qtextoption.h \
   /usr/include/qt6/QtGui/qtgui-config.h \
@@ -581,8 +585,16 @@ src/jenovaktext_autogen/timestamp: src/jenovaktext_autogen/moc_predefs.h \
   /usr/include/qt6/QtNetwork/qtnetwork-config.h \
   /usr/include/qt6/QtNetwork/qtnetworkexports.h \
   /usr/include/qt6/QtNetwork/qtnetworkglobal.h \
+  /usr/include/qt6/QtWidgets/QCompleter \
+  /usr/include/qt6/QtWidgets/QMenu \
+  /usr/include/qt6/QtWidgets/QTextEdit \
   /usr/include/qt6/QtWidgets/QWidget \
+  /usr/include/qt6/QtWidgets/qabstractscrollarea.h \
+  /usr/include/qt6/QtWidgets/qcompleter.h \
+  /usr/include/qt6/QtWidgets/qframe.h \
+  /usr/include/qt6/QtWidgets/qmenu.h \
   /usr/include/qt6/QtWidgets/qsizepolicy.h \
+  /usr/include/qt6/QtWidgets/qtextedit.h \
   /usr/include/qt6/QtWidgets/qtwidgets-config.h \
   /usr/include/qt6/QtWidgets/qtwidgetsexports.h \
   /usr/include/qt6/QtWidgets/qtwidgetsglobal.h \
@@ -632,7 +644,15 @@ src/jenovaktext_autogen/timestamp: src/jenovaktext_autogen/moc_predefs.h \
 
 /usr/include/qt6/QtWidgets/qsizepolicy.h:
 
+/usr/include/qt6/QtWidgets/qmenu.h:
+
+/usr/include/qt6/QtWidgets/qabstractscrollarea.h:
+
 /usr/include/qt6/QtWidgets/QWidget:
+
+/usr/include/qt6/QtWidgets/QTextEdit:
+
+/usr/include/qt6/QtWidgets/QMenu:
 
 /usr/include/qt6/QtNetwork/qtnetworkglobal.h:
 
@@ -660,6 +680,8 @@ src/jenovaktext_autogen/timestamp: src/jenovaktext_autogen/moc_predefs.h \
 
 /usr/include/qt6/QtNetwork/QNetworkRequest:
 
+/usr/include/qt6/QtGui/qtextdocument.h:
+
 /usr/include/qt6/QtGui/qrgba64.h:
 
 /usr/include/qt6/QtGui/qpixelformat.h:
@@ -671,6 +693,10 @@ src/jenovaktext_autogen/timestamp: src/jenovaktext_autogen/moc_predefs.h \
 /usr/include/qt6/QtGui/qpaintdevice.h:
 
 /usr/include/qt6/QtGui/qkeysequence.h:
+
+/usr/include/qt6/QtGui/qicon.h:
+
+/usr/include/qt6/QtGui/qfontvariableaxis.h:
 
 /usr/include/c++/16/bits/streambuf_iterator.h:
 
@@ -874,10 +900,6 @@ src/jenovaktext_autogen/timestamp: src/jenovaktext_autogen/moc_predefs.h \
 
 /usr/include/qt6/QtCore/qcborvalue.h:
 
-/usr/include/qt6/QtGui/qfontvariableaxis.h:
-
-/usr/include/c++/16/bits/uses_allocator_args.h:
-
 /usr/include/c++/16/bits/ranges_base.h:
 
 /usr/include/bits/xopen_lim.h:
@@ -904,11 +926,25 @@ src/jenovaktext_autogen/timestamp: src/jenovaktext_autogen/moc_predefs.h \
 
 /usr/include/c++/16/new:
 
-/usr/include/KF6/KXmlGui/kxmlgui_export.h:
+/usr/include/bits/types/struct_tm.h:
 
-/usr/include/bits/stdlib-float.h:
+/home/orpheus497/Documents/Projects/ktext_jenova/src/completion/AiCompletionModel.cpp:
 
-/usr/include/bits/posix2_lim.h:
+/usr/include/endian.h:
+
+/usr/include/c++/16/iterator:
+
+/usr/include/c++/16/bits/locale_classes.tcc:
+
+/home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatInputWidget.cpp:
+
+/usr/include/bits/types/struct_timeval.h:
+
+/usr/include/c++/16/ostream:
+
+/usr/include/KF6/KTextEditor/KTextEditor/ConfigPage:
+
+/usr/include/c++/16/pstl/pstl_config.h:
 
 /usr/include/c++/16/bits/unique_ptr.h:
 
@@ -1032,8 +1068,6 @@ src/jenovaktext_autogen/timestamp: src/jenovaktext_autogen/moc_predefs.h \
 
 /usr/include/c++/16/bits/allocated_ptr.h:
 
-/usr/include/c++/16/bits/locale_classes.tcc:
-
 /usr/include/c++/16/bits/stl_function.h:
 
 /usr/include/bits/time64.h:
@@ -1088,7 +1122,17 @@ src/jenovaktext_autogen/timestamp: src/jenovaktext_autogen/moc_predefs.h \
 
 /usr/include/c++/16/bits/stl_heap.h:
 
+/usr/include/qt6/QtWidgets/QCompleter:
+
 /usr/include/qt6/QtCore/qbytearray.h:
+
+/usr/include/KF6/KTextEditor/KTextEditor/Document:
+
+/usr/include/KF6/KParts/kparts/readonlypart.h:
+
+/usr/include/c++/16/bits/unordered_map.h:
+
+/usr/include/c++/16/ext/alloc_traits.h:
 
 /usr/include/c++/16/bits/stl_iterator_base_funcs.h:
 
@@ -1114,10 +1158,6 @@ src/jenovaktext_autogen/timestamp: src/jenovaktext_autogen/moc_predefs.h \
 
 /usr/include/c++/16/bits/exception_defines.h:
 
-/usr/include/c++/16/bits/utility.h:
-
-/usr/include/KF6/KTextEditor/ktexteditor/codecompletionmodel.h:
-
 /usr/include/c++/16/bits/chrono.h:
 
 /home/orpheus497/Documents/Projects/ktext_jenova/src/CMakeLists.txt:
@@ -1140,14 +1180,6 @@ src/jenovaktext_autogen/timestamp: src/jenovaktext_autogen/moc_predefs.h \
 
 /usr/include/qt6/QtCore/qalloc.h:
 
-/home/orpheus497/Documents/Projects/ktext_jenova/src/completion/AiCompletionModel.cpp:
-
-/usr/include/bits/types/struct_tm.h:
-
-/usr/include/endian.h:
-
-/usr/include/c++/16/iterator:
-
 /usr/include/bits/floatn.h:
 
 /usr/include/c++/16/bits/vector.tcc:
@@ -1162,11 +1194,19 @@ src/jenovaktext_autogen/timestamp: src/jenovaktext_autogen/moc_predefs.h \
 
 /usr/include/qt6/QtCore/qnamespace.h:
 
+/usr/include/qt6/QtCore/qoverload.h:
+
 /home/orpheus497/Documents/Projects/ktext_jenova/src/plugin/AiPluginView.cpp:
 
 /usr/include/asm-generic/errno-base.h:
 
 /usr/include/c++/16/clocale:
+
+/usr/include/bits/types/FILE.h:
+
+/usr/include/linux/posix_types.h:
+
+/usr/include/qt6/QtCore/QObject:
 
 /usr/include/c++/16/backward/auto_ptr.h:
 
@@ -1190,13 +1230,11 @@ src/jenovaktext_autogen/moc_predefs.h:
 
 /usr/include/bits/byteswap.h:
 
-/usr/include/KF6/KTextEditor/KTextEditor/Document:
+/usr/include/KF6/KXmlGui/kxmlgui_export.h:
 
-/usr/include/KF6/KParts/kparts/readonlypart.h:
+/usr/include/bits/stdlib-float.h:
 
-/usr/include/c++/16/bits/unordered_map.h:
-
-/usr/include/c++/16/ext/alloc_traits.h:
+/usr/include/bits/posix2_lim.h:
 
 /usr/include/c++/16/bits/stl_multiset.h:
 
@@ -1290,14 +1328,6 @@ src/jenovaktext_autogen/moc_predefs.h:
 
 /usr/include/bits/stdio_lim.h:
 
-/usr/include/bits/types/struct_timeval.h:
-
-/usr/include/c++/16/ostream:
-
-/usr/include/KF6/KTextEditor/KTextEditor/ConfigPage:
-
-/usr/include/c++/16/pstl/pstl_config.h:
-
 /usr/include/qt6/QtCore/q20type_traits.h:
 
 /usr/include/c++/16/bits/allocator.h:
@@ -1313,12 +1343,6 @@ src/jenovaktext_autogen/moc_predefs.h:
 /usr/include/qt6/QtCore/qiodevice.h:
 
 /usr/include/qt6/QtCore/qtaggedpointer.h:
-
-/usr/include/bits/types/FILE.h:
-
-/usr/include/linux/posix_types.h:
-
-/usr/include/qt6/QtCore/QObject:
 
 /usr/include/bits/types/__fpos64_t.h:
 
@@ -1336,6 +1360,8 @@ src/jenovaktext_autogen/moc_predefs.h:
 
 /usr/include/bits/types/locale_t.h:
 
+/usr/include/qt6/QtWidgets/qtextedit.h:
+
 /usr/include/c++/16/bits/memory_resource.h:
 
 /usr/include/bits/types/sigset_t.h:
@@ -1345,6 +1371,12 @@ src/jenovaktext_autogen/moc_predefs.h:
 /usr/include/c++/16/cwctype:
 
 /usr/include/bits/types/struct_sched_param.h:
+
+/usr/include/c++/16/bits/uses_allocator_args.h:
+
+/usr/include/KF6/KTextEditor/ktexteditor/codecompletionmodel.h:
+
+/usr/include/c++/16/bits/utility.h:
 
 /usr/include/c++/16/bits/version.h:
 
@@ -1366,6 +1398,8 @@ src/jenovaktext_autogen/moc_predefs.h:
 
 /usr/include/qt6/QtCore/qtnoop.h:
 
+/usr/include/qt6/QtGui/qtextcursor.h:
+
 /usr/include/c++/16/climits:
 
 /usr/include/c++/16/bits/localefwd.h:
@@ -1385,8 +1419,6 @@ src/jenovaktext_autogen/moc_predefs.h:
 /usr/include/c++/16/bits/stl_uninitialized.h:
 
 /usr/include/c++/16/cstring:
-
-/usr/include/qt6/QtGui/qicon.h:
 
 /usr/include/c++/16/ctime:
 
@@ -1496,6 +1528,8 @@ src/jenovaktext_autogen/moc_predefs.h:
 
 /usr/include/KF6/KTextEditor/ktexteditor/range.h:
 
+/home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatInputWidget.h:
+
 /usr/include/c++/16/x86_64-pc-linux-gnu/bits/c++allocator.h:
 
 /usr/include/c++/16/x86_64-pc-linux-gnu/bits/c++locale.h:
@@ -1584,6 +1618,8 @@ src/jenovaktext_autogen/moc_predefs.h:
 
 /usr/include/qt6/QtCore/q20functional.h:
 
+/usr/include/qt6/QtWidgets/qcompleter.h:
+
 /usr/include/qt6/QtCore/q20utility.h:
 
 /usr/include/qt6/QtCore/q23type_traits.h:
@@ -1607,6 +1643,8 @@ src/jenovaktext_autogen/moc_predefs.h:
 /usr/include/qt6/QtCore/qassert.h:
 
 /usr/include/qt6/QtCore/qbindingstorage.h:
+
+/usr/include/qt6/QtWidgets/qframe.h:
 
 /usr/include/qt6/QtCore/qbytearrayalgorithms.h:
 
@@ -1709,8 +1747,6 @@ src/jenovaktext_autogen/moc_predefs.h:
 /usr/include/qt6/QtCore/qobjectdefs.h:
 
 /usr/include/qt6/QtCore/qobjectdefs_impl.h:
-
-/usr/include/qt6/QtCore/qoverload.h:
 
 /usr/include/qt6/QtCore/qpair.h:
 

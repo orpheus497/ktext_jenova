@@ -370,6 +370,18 @@ src/CMakeFiles/jenovaktext.dir/ui/AiChatWidget.cpp.o: \
  /usr/include/qt6/QtCore/qurl.h /usr/include/qt6/QtCore/quuid.h \
  /usr/include/qt6/QtCore/qjsondocument.h \
  /usr/include/qt6/QtCore/qjsonparseerror.h \
+ /home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatInputWidget.h \
+ /usr/include/qt6/QtWidgets/QTextEdit \
+ /usr/include/qt6/QtWidgets/qtextedit.h \
+ /usr/include/qt6/QtWidgets/qabstractscrollarea.h \
+ /usr/include/qt6/QtWidgets/qframe.h \
+ /usr/include/qt6/QtGui/qtextdocument.h \
+ /usr/include/qt6/QtGui/qtextoption.h \
+ /usr/include/qt6/QtGui/qtextcursor.h \
+ /usr/include/qt6/QtGui/qtextformat.h /usr/include/qt6/QtGui/qpen.h \
+ /usr/include/qt6/QtWidgets/QCompleter \
+ /usr/include/qt6/QtWidgets/qcompleter.h \
+ /usr/include/qt6/QtCore/qabstractitemmodel.h \
  /home/orpheus497/Documents/Projects/ktext_jenova/src/ui/../network/LlamaClient.h \
  /usr/include/qt6/QtCore/QObject /usr/include/qt6/QtCore/QString \
  /usr/include/qt6/QtCore/QJsonObject \
@@ -419,8 +431,6 @@ src/CMakeFiles/jenovaktext.dir/ui/AiChatWidget.cpp.o: \
  /usr/include/qt6/QtCore/QExplicitlySharedDataPointer \
  /usr/include/qt6/QtCore/QSharedData \
  /usr/include/qt6/QtGui/QTextCharFormat \
- /usr/include/qt6/QtGui/qtextformat.h /usr/include/qt6/QtGui/qpen.h \
- /usr/include/qt6/QtGui/qtextoption.h \
  /usr/include/KF6/KSyntaxHighlighting/KSyntaxHighlighting/Theme \
  /usr/include/KF6/KSyntaxHighlighting/KSyntaxHighlighting/theme.h \
  /usr/include/KF6/KSyntaxHighlighting/KSyntaxHighlighting/ksyntaxhighlighting_export.h \
@@ -449,9 +459,8 @@ src/CMakeFiles/jenovaktext.dir/ui/AiChatWidget.cpp.o: \
  /usr/include/KF6/KTextEditor/KTextEditor/View \
  /usr/include/KF6/KTextEditor/ktexteditor/view.h \
  /usr/include/KF6/KTextEditor/ktexteditor/codecompletionmodel.h \
- /usr/include/qt6/QtCore/QModelIndex \
- /usr/include/qt6/QtCore/qabstractitemmodel.h \
- /usr/include/qt6/QtCore/QFlags /usr/include/qt6/QtCore/QSet \
+ /usr/include/qt6/QtCore/QModelIndex /usr/include/qt6/QtCore/QFlags \
+ /usr/include/qt6/QtCore/QSet \
  /usr/include/KF6/KTextEditor/KTextEditor/MainWindow \
  /usr/include/KF6/KTextEditor/ktexteditor/mainwindow.h \
  /usr/include/qt6/QtGui/QWidgetList \
@@ -460,19 +469,9 @@ src/CMakeFiles/jenovaktext.dir/ui/AiChatWidget.cpp.o: \
  /usr/include/qt6/QtWidgets/qlayout.h \
  /usr/include/qt6/QtWidgets/qlayoutitem.h \
  /usr/include/qt6/QtWidgets/qgridlayout.h \
- /usr/include/qt6/QtWidgets/QHBoxLayout \
  /usr/include/qt6/QtWidgets/QTextBrowser \
- /usr/include/qt6/QtWidgets/qtextbrowser.h \
- /usr/include/qt6/QtWidgets/qtextedit.h \
- /usr/include/qt6/QtWidgets/qabstractscrollarea.h \
- /usr/include/qt6/QtWidgets/qframe.h \
- /usr/include/qt6/QtGui/qtextdocument.h \
- /usr/include/qt6/QtGui/qtextcursor.h \
- /usr/include/qt6/QtWidgets/QTextEdit \
- /usr/include/qt6/QtWidgets/QPushButton \
- /usr/include/qt6/QtWidgets/qpushbutton.h \
- /usr/include/qt6/QtWidgets/qabstractbutton.h \
- /usr/include/qt6/QtCore/QEvent /usr/include/qt6/QtCore/qcoreevent.h \
+ /usr/include/qt6/QtWidgets/qtextbrowser.h /usr/include/qt6/QtCore/QEvent \
+ /usr/include/qt6/QtCore/qcoreevent.h \
  /usr/include/qt6/QtCore/qbasictimer.h \
  /usr/include/qt6/QtCore/qabstracteventdispatcher.h \
  /usr/include/qt6/QtCore/qeventloop.h \

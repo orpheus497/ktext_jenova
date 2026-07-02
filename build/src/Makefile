@@ -381,6 +381,30 @@ plugin/AiPluginView.cpp.s:
 	cd /home/orpheus497/Documents/Projects/ktext_jenova/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/jenovaktext.dir/build.make src/CMakeFiles/jenovaktext.dir/plugin/AiPluginView.cpp.s
 .PHONY : plugin/AiPluginView.cpp.s
 
+ui/AiChatInputWidget.o: ui/AiChatInputWidget.cpp.o
+.PHONY : ui/AiChatInputWidget.o
+
+# target to build an object file
+ui/AiChatInputWidget.cpp.o:
+	cd /home/orpheus497/Documents/Projects/ktext_jenova/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/jenovaktext.dir/build.make src/CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.o
+.PHONY : ui/AiChatInputWidget.cpp.o
+
+ui/AiChatInputWidget.i: ui/AiChatInputWidget.cpp.i
+.PHONY : ui/AiChatInputWidget.i
+
+# target to preprocess a source file
+ui/AiChatInputWidget.cpp.i:
+	cd /home/orpheus497/Documents/Projects/ktext_jenova/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/jenovaktext.dir/build.make src/CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.i
+.PHONY : ui/AiChatInputWidget.cpp.i
+
+ui/AiChatInputWidget.s: ui/AiChatInputWidget.cpp.s
+.PHONY : ui/AiChatInputWidget.s
+
+# target to generate assembly for a file
+ui/AiChatInputWidget.cpp.s:
+	cd /home/orpheus497/Documents/Projects/ktext_jenova/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/jenovaktext.dir/build.make src/CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.s
+.PHONY : ui/AiChatInputWidget.cpp.s
+
 ui/AiChatWidget.o: ui/AiChatWidget.cpp.o
 .PHONY : ui/AiChatWidget.o
 
@@ -442,6 +466,9 @@ help:
 	@echo "... plugin/AiPluginView.o"
 	@echo "... plugin/AiPluginView.i"
 	@echo "... plugin/AiPluginView.s"
+	@echo "... ui/AiChatInputWidget.o"
+	@echo "... ui/AiChatInputWidget.i"
+	@echo "... ui/AiChatInputWidget.s"
 	@echo "... ui/AiChatWidget.o"
 	@echo "... ui/AiChatWidget.i"
 	@echo "... ui/AiChatWidget.s"

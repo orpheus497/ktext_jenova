@@ -11,6 +11,7 @@ set(jenovaktext_SRCS
     network/LlamaClient.cpp
     context/ContextManager.cpp
     ui/AiChatWidget.cpp
+    ui/AiChatInputWidget.cpp
     completion/AiCompletionModel.cpp
 )
 

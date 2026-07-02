@@ -73,7 +73,7 @@ src/jenovaktext_autogen/timestamp: /usr/lib/qt6/moc
 src/jenovaktext_autogen/timestamp: /usr/lib/qt6/uic
 src/jenovaktext_autogen/timestamp: src/CMakeFiles/jenovaktext.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/orpheus497/Documents/Projects/ktext_jenova/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Automatic MOC and UIC for target jenovaktext"
-	cd /home/orpheus497/Documents/Projects/ktext_jenova/build/src && /usr/bin/cmake -E cmake_autogen /home/orpheus497/Documents/Projects/ktext_jenova/build/src/CMakeFiles/jenovaktext_autogen.dir/AutogenInfo.json ""
+	cd /home/orpheus497/Documents/Projects/ktext_jenova/build/src && /usr/bin/cmake -E cmake_autogen /home/orpheus497/Documents/Projects/ktext_jenova/build/src/CMakeFiles/jenovaktext_autogen.dir/AutogenInfo.json Debug
 	cd /home/orpheus497/Documents/Projects/ktext_jenova/build/src && /usr/bin/cmake -E touch /home/orpheus497/Documents/Projects/ktext_jenova/build/src/jenovaktext_autogen/timestamp
 
 src/CMakeFiles/jenovaktext.dir/codegen:
@@ -177,10 +177,24 @@ src/CMakeFiles/jenovaktext.dir/ui/AiChatWidget.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/jenovaktext.dir/ui/AiChatWidget.cpp.s"
 	cd /home/orpheus497/Documents/Projects/ktext_jenova/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatWidget.cpp -o CMakeFiles/jenovaktext.dir/ui/AiChatWidget.cpp.s
 
+src/CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.o: src/CMakeFiles/jenovaktext.dir/flags.make
+src/CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.o: /home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatInputWidget.cpp
+src/CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.o: src/CMakeFiles/jenovaktext.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/orpheus497/Documents/Projects/ktext_jenova/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object src/CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.o"
+	cd /home/orpheus497/Documents/Projects/ktext_jenova/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.o -MF CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.o.d -o CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.o -c /home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatInputWidget.cpp
+
+src/CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.i"
+	cd /home/orpheus497/Documents/Projects/ktext_jenova/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatInputWidget.cpp > CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.i
+
+src/CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.s"
+	cd /home/orpheus497/Documents/Projects/ktext_jenova/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatInputWidget.cpp -o CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.s
+
 src/CMakeFiles/jenovaktext.dir/completion/AiCompletionModel.cpp.o: src/CMakeFiles/jenovaktext.dir/flags.make
 src/CMakeFiles/jenovaktext.dir/completion/AiCompletionModel.cpp.o: /home/orpheus497/Documents/Projects/ktext_jenova/src/completion/AiCompletionModel.cpp
 src/CMakeFiles/jenovaktext.dir/completion/AiCompletionModel.cpp.o: src/CMakeFiles/jenovaktext.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/orpheus497/Documents/Projects/ktext_jenova/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object src/CMakeFiles/jenovaktext.dir/completion/AiCompletionModel.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/orpheus497/Documents/Projects/ktext_jenova/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object src/CMakeFiles/jenovaktext.dir/completion/AiCompletionModel.cpp.o"
 	cd /home/orpheus497/Documents/Projects/ktext_jenova/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CMakeFiles/jenovaktext.dir/completion/AiCompletionModel.cpp.o -MF CMakeFiles/jenovaktext.dir/completion/AiCompletionModel.cpp.o.d -o CMakeFiles/jenovaktext.dir/completion/AiCompletionModel.cpp.o -c /home/orpheus497/Documents/Projects/ktext_jenova/src/completion/AiCompletionModel.cpp
 
 src/CMakeFiles/jenovaktext.dir/completion/AiCompletionModel.cpp.i: cmake_force
@@ -200,6 +214,7 @@ jenovaktext_OBJECTS = \
 "CMakeFiles/jenovaktext.dir/network/LlamaClient.cpp.o" \
 "CMakeFiles/jenovaktext.dir/context/ContextManager.cpp.o" \
 "CMakeFiles/jenovaktext.dir/ui/AiChatWidget.cpp.o" \
+"CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.o" \
 "CMakeFiles/jenovaktext.dir/completion/AiCompletionModel.cpp.o"
 
 # External object files for target jenovaktext
@@ -212,12 +227,13 @@ bin/kf6/ktexteditor/jenovaktext.so: src/CMakeFiles/jenovaktext.dir/config/AiConf
 bin/kf6/ktexteditor/jenovaktext.so: src/CMakeFiles/jenovaktext.dir/network/LlamaClient.cpp.o
 bin/kf6/ktexteditor/jenovaktext.so: src/CMakeFiles/jenovaktext.dir/context/ContextManager.cpp.o
 bin/kf6/ktexteditor/jenovaktext.so: src/CMakeFiles/jenovaktext.dir/ui/AiChatWidget.cpp.o
+bin/kf6/ktexteditor/jenovaktext.so: src/CMakeFiles/jenovaktext.dir/ui/AiChatInputWidget.cpp.o
 bin/kf6/ktexteditor/jenovaktext.so: src/CMakeFiles/jenovaktext.dir/completion/AiCompletionModel.cpp.o
 bin/kf6/ktexteditor/jenovaktext.so: src/CMakeFiles/jenovaktext.dir/build.make
 bin/kf6/ktexteditor/jenovaktext.so: /usr/lib/libGLX.so
 bin/kf6/ktexteditor/jenovaktext.so: /usr/lib/libOpenGL.so
 bin/kf6/ktexteditor/jenovaktext.so: src/CMakeFiles/jenovaktext.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/orpheus497/Documents/Projects/ktext_jenova/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX shared module ../bin/kf6/ktexteditor/jenovaktext.so"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/orpheus497/Documents/Projects/ktext_jenova/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Linking CXX shared module ../bin/kf6/ktexteditor/jenovaktext.so"
 	cd /home/orpheus497/Documents/Projects/ktext_jenova/build/src && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/jenovaktext.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

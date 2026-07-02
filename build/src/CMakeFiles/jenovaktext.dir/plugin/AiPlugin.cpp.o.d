@@ -426,6 +426,7 @@ src/CMakeFiles/jenovaktext.dir/plugin/AiPlugin.cpp.o: \
  /usr/include/qt6/QtWidgets/qsizepolicy.h \
  /usr/include/qt6/QtGui/qcursor.h /usr/include/qt6/QtGui/qbitmap.h \
  /usr/include/KF6/KTextEditor/KTextEditor/MovingRange \
+ /usr/include/qt6/QtWidgets/QMenu /usr/include/qt6/QtWidgets/qmenu.h \
  /usr/include/qt6/QtCore/QPointer /usr/include/qt6/QtCore/qpointer.h \
  /home/orpheus497/Documents/Projects/ktext_jenova/src/plugin/../config/AiConfigPage.h \
  /usr/include/KF6/KTextEditor/KTextEditor/ConfigPage \

@@ -535,7 +535,9 @@
   /usr/include/qt6/QtGui/qtguiglobal.h \
   /usr/include/qt6/QtGui/qtransform.h \
   /usr/include/qt6/QtGui/qwindowdefs.h \
+  /usr/include/qt6/QtWidgets/QMenu \
   /usr/include/qt6/QtWidgets/QWidget \
+  /usr/include/qt6/QtWidgets/qmenu.h \
   /usr/include/qt6/QtWidgets/qsizepolicy.h \
   /usr/include/qt6/QtWidgets/qtwidgets-config.h \
   /usr/include/qt6/QtWidgets/qtwidgetsexports.h \

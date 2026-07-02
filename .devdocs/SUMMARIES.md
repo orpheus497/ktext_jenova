@@ -1,5 +1,8 @@
 # Historical Session Summaries
 
+**Timestamp**: 2026-07-02 15:14
+* **Phase 12**: Performed a clean, non-destructive replication of `kate-code` chat autocompletion and `kdevcxx_with_ai` context menu logic. Resolved severe `KTextEditor` live-typing crashes by replacing invalid `beginResetModel()` calls with granular model insertion methods, preventing Qt segfaults during asynchronous AI generation. Successfully recompiled without external dependencies.
+
 **Timestamp**: 2026-07-02 14:49
 * **Phase 11**: Added repository essentials including a Qt/CMake specific `.gitignore` and a comprehensive `README.md` documenting architecture, features, and building instructions. Verified the pre-existing `LICENSE` file as BSD 2-Clause compliant.
 

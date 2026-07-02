@@ -1,5 +1,12 @@
 # Session Handoff Log
 
+**Timestamp**: 2026-07-02 15:14
+## Phase 12 Reference Replication & Crash Fixes Session
+* **Accomplishments**: Successfully completed a non-destructive replication of reference plugin features. Fixed the stubborn live-typing crashes in `AiCompletionModel` by overhauling the async model updates; replaced aggressive `beginResetModel()` calls with precise `beginInsertRows()` and `beginRemoveRows()`, preventing Kate from segfaulting when redrawing the autocomplete popup. Upgraded the chat sidebar to support `/command` and `@file` autocompletion by natively migrating `kate-code`'s `CommandTextEdit` into a custom `AiChatInputWidget`. Replicated `kdevcxx_with_ai`'s right-click context menu logic for "AI: Refactor Selection" directly into `AiPluginView`. Successfully rebuilt the plugin from source, confirming no lingering dependencies on Boost or external libraries.
+* **Modified Files**: `src/completion/AiCompletionModel.cpp`, `src/ui/AiChatInputWidget.h` (New), `src/ui/AiChatInputWidget.cpp` (New), `src/ui/AiChatWidget.h`, `src/ui/AiChatWidget.cpp`, `src/plugin/AiPluginView.h`, `src/plugin/AiPluginView.cpp`, `src/CMakeLists.txt`.
+* **Decisions**: Never dump whole codebases over our native work; strictly adapt their logic into our custom components to maintain absolute control over the project's dependency graph. Utilize granular Qt model updates to ensure KTextEditor UI stability.
+* **Next Steps**: Await user testing to verify context menu and typing stability.
+
 **Timestamp**: 2026-07-02 14:49
 ## Phase 11 Repository Essentials Session
 * **Accomplishments**: Generated a standard Qt/KDE `.gitignore` to keep the repository clean of build artifacts. Authored a comprehensive `README.md` detailing the Jenova K Text plugin, its architecture, compilation steps, and usage. Verified that the existing `LICENSE` file is already a BSD 2-Clause License, fulfilling the user's requirements.

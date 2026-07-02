@@ -476,6 +476,17 @@ src/CMakeFiles/jenovaktext.dir/jenovaktext_autogen/mocs_compilation.cpp.o: \
  /usr/include/KF6/KTextEditor/ktexteditor/mainwindow.h \
  /usr/include/qt6/QtGui/QWidgetList \
  /usr/include/KF6/KTextEditor/KTextEditor/MovingRange \
+ /usr/include/qt6/QtWidgets/QMenu /usr/include/qt6/QtWidgets/qmenu.h \
+ /home/orpheus497/Documents/Projects/ktext_jenova/build/src/jenovaktext_autogen/UYX5XTB5RZ/moc_AiChatInputWidget.cpp \
+ /home/orpheus497/Documents/Projects/ktext_jenova/build/src/jenovaktext_autogen/UYX5XTB5RZ/../../../../src/ui/AiChatInputWidget.h \
+ /usr/include/qt6/QtWidgets/QTextEdit \
+ /usr/include/qt6/QtWidgets/qtextedit.h \
+ /usr/include/qt6/QtWidgets/qabstractscrollarea.h \
+ /usr/include/qt6/QtWidgets/qframe.h \
+ /usr/include/qt6/QtGui/qtextdocument.h \
+ /usr/include/qt6/QtGui/qtextcursor.h \
+ /usr/include/qt6/QtWidgets/QCompleter \
+ /usr/include/qt6/QtWidgets/qcompleter.h \
  /home/orpheus497/Documents/Projects/ktext_jenova/build/src/jenovaktext_autogen/UYX5XTB5RZ/moc_AiChatWidget.cpp \
  /home/orpheus497/Documents/Projects/ktext_jenova/build/src/jenovaktext_autogen/UYX5XTB5RZ/../../../../src/ui/AiChatWidget.h \
  /usr/include/qt6/QtCore/QJsonArray /usr/include/qt6/QtCore/qjsonarray.h

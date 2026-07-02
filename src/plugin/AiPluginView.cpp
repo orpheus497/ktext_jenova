@@ -12,6 +12,7 @@
 #include <QAction>
 #include <QVBoxLayout>
 #include <KXMLGUIFactory>
+#include <QMenu>
 
 // ##Method purpose: Initializes the view, creates actions, tool views, and connects signals.
 AiPluginView::AiPluginView(AiPlugin *plugin, KTextEditor::MainWindow *mainWindow)
@@ -59,9 +60,9 @@ AiPluginView::~AiPluginView()
 // ##Method purpose: Registers the custom AI actions into the application's action collection.
 void AiPluginView::setupActions()
 {
-    QAction *refactorAction = actionCollection()->addAction(QStringLiteral("ai_refactor"));
-    refactorAction->setText(i18n("AI: Refactor Selection..."));
-    connect(refactorAction, &QAction::triggered, this, &AiPluginView::requestAiRefactor);
+    m_refactorAction = actionCollection()->addAction(QStringLiteral("ai_refactor"));
+    m_refactorAction->setText(i18n("AI: Refactor Selection..."));
+    connect(m_refactorAction, &QAction::triggered, this, &AiPluginView::requestAiRefactor);
 }
 
 // ##Method purpose: Constructs the dockable tool view in the right sidebar.
@@ -101,6 +102,16 @@ void AiPluginView::onActiveViewChanged(KTextEditor::View *view)
     // ##Condition purpose: Register on the new view.
     if (m_activeView) {
         m_activeView->registerCompletionModel(m_completionModel);
+        connect(m_activeView.data(), &KTextEditor::View::contextMenuAboutToShow, this, &AiPluginView::onContextMenuAboutToShow, Qt::UniqueConnection);
+    }
+}
+
+// ##Method purpose: Adds the AI Refactor action to the context menu.
+void AiPluginView::onContextMenuAboutToShow(KTextEditor::View *view, QMenu *menu)
+{
+    if (!menu || !view) return;
+    if (m_refactorAction && !menu->actions().contains(m_refactorAction)) {
+        menu->addAction(m_refactorAction);
     }
 }
 

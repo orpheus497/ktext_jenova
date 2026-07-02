@@ -48,6 +48,12 @@
 			null
 		],
 		[
+			"/home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatInputWidget.h",
+			"MU",
+			"UYX5XTB5RZ/moc_AiChatInputWidget.cpp",
+			null
+		],
+		[
 			"/home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatWidget.h",
 			"MU",
 			"UYX5XTB5RZ/moc_AiChatWidget.cpp",
@@ -69,7 +75,6 @@
 		"QT_NO_CAST_FROM_ASCII",
 		"QT_NO_CAST_FROM_BYTEARRAY",
 		"QT_NO_CAST_TO_ASCII",
-		"QT_NO_DEBUG",
 		"QT_NO_FOREACH",
 		"QT_NO_KEYWORDS",
 		"QT_NO_NARROWING_CONVERSIONS_IN_CONNECT",
@@ -189,6 +194,11 @@
 		],
 		[
 			"/home/orpheus497/Documents/Projects/ktext_jenova/src/plugin/AiPluginView.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatInputWidget.cpp",
 			"MU",
 			null
 		],

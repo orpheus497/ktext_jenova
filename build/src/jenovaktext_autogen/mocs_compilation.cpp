@@ -5,4 +5,5 @@
 #include "5SSUPNRDSB/moc_LlamaClient.cpp"
 #include "7RBZBFH7CH/moc_AiPlugin.cpp"
 #include "7RBZBFH7CH/moc_AiPluginView.cpp"
+#include "UYX5XTB5RZ/moc_AiChatInputWidget.cpp"
 #include "UYX5XTB5RZ/moc_AiChatWidget.cpp"

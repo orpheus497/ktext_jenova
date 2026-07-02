@@ -72,7 +72,7 @@ src/jenovaktext_autogen/timestamp: /usr/lib/qt6/moc
 src/jenovaktext_autogen/timestamp: /usr/lib/qt6/uic
 src/jenovaktext_autogen/timestamp: src/CMakeFiles/jenovaktext_autogen.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/orpheus497/Documents/Projects/ktext_jenova/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Automatic MOC and UIC for target jenovaktext"
-	cd /home/orpheus497/Documents/Projects/ktext_jenova/build/src && /usr/bin/cmake -E cmake_autogen /home/orpheus497/Documents/Projects/ktext_jenova/build/src/CMakeFiles/jenovaktext_autogen.dir/AutogenInfo.json ""
+	cd /home/orpheus497/Documents/Projects/ktext_jenova/build/src && /usr/bin/cmake -E cmake_autogen /home/orpheus497/Documents/Projects/ktext_jenova/build/src/CMakeFiles/jenovaktext_autogen.dir/AutogenInfo.json Debug
 	cd /home/orpheus497/Documents/Projects/ktext_jenova/build/src && /usr/bin/cmake -E touch /home/orpheus497/Documents/Projects/ktext_jenova/build/src/jenovaktext_autogen/timestamp
 
 src/CMakeFiles/jenovaktext_autogen.dir/codegen:

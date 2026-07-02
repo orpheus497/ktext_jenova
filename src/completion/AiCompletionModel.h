@@ -22,9 +22,6 @@ public:
     
     // ##Method purpose: Returns the display text for the autocomplete popup list.
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    
-    // ##Method purpose: Returns the number of currently available completions.
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
 private Q_SLOTS:
     // ##Method purpose: Callback triggered when the LlamaClient finishes an infill request.

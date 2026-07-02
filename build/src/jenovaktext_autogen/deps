@@ -14,6 +14,8 @@ jenovaktext_autogen/timestamp: \
 	/home/orpheus497/Documents/Projects/ktext_jenova/src/plugin/AiPlugin.h \
 	/home/orpheus497/Documents/Projects/ktext_jenova/src/plugin/AiPluginView.cpp \
 	/home/orpheus497/Documents/Projects/ktext_jenova/src/plugin/AiPluginView.h \
+	/home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatInputWidget.cpp \
+	/home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatInputWidget.h \
 	/home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatWidget.cpp \
 	/home/orpheus497/Documents/Projects/ktext_jenova/src/ui/AiChatWidget.h \
 	/usr/include/KF6/KCoreAddons/KPluginFactory \
@@ -550,6 +552,8 @@ jenovaktext_autogen/timestamp: \
 	/usr/include/qt6/QtGui/qregion.h \
 	/usr/include/qt6/QtGui/qrgb.h \
 	/usr/include/qt6/QtGui/qrgba64.h \
+	/usr/include/qt6/QtGui/qtextcursor.h \
+	/usr/include/qt6/QtGui/qtextdocument.h \
 	/usr/include/qt6/QtGui/qtextformat.h \
 	/usr/include/qt6/QtGui/qtextoption.h \
 	/usr/include/qt6/QtGui/qtgui-config.h \
@@ -578,8 +582,16 @@ jenovaktext_autogen/timestamp: \
 	/usr/include/qt6/QtNetwork/qtnetwork-config.h \
 	/usr/include/qt6/QtNetwork/qtnetworkexports.h \
 	/usr/include/qt6/QtNetwork/qtnetworkglobal.h \
+	/usr/include/qt6/QtWidgets/QCompleter \
+	/usr/include/qt6/QtWidgets/QMenu \
+	/usr/include/qt6/QtWidgets/QTextEdit \
 	/usr/include/qt6/QtWidgets/QWidget \
+	/usr/include/qt6/QtWidgets/qabstractscrollarea.h \
+	/usr/include/qt6/QtWidgets/qcompleter.h \
+	/usr/include/qt6/QtWidgets/qframe.h \
+	/usr/include/qt6/QtWidgets/qmenu.h \
 	/usr/include/qt6/QtWidgets/qsizepolicy.h \
+	/usr/include/qt6/QtWidgets/qtextedit.h \
 	/usr/include/qt6/QtWidgets/qtwidgets-config.h \
 	/usr/include/qt6/QtWidgets/qtwidgetsexports.h \
 	/usr/include/qt6/QtWidgets/qtwidgetsglobal.h \
