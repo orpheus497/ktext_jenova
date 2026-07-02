@@ -21,6 +21,9 @@ public:
     // ##Method purpose: Reads and returns the contents of AGENTS.md if found in the project root.
     QString getAgentsInstruction(const QString &projectRoot) const;
 
-    // ##Method purpose: Constructs the initial system prompt containing all gathered context.
+    // ##Method purpose: Assembles the final system prompt string containing the root instructions and selection.
     QString buildSystemPrompt(KTextEditor::View *view) const;
+
+    // ##Method purpose: Builds a context-aware prompt for the AI refactoring action.
+    QString buildRefactorPrompt(const QString &instruction, const QString &code, KTextEditor::View *view) const;
 };

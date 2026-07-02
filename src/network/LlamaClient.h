@@ -29,8 +29,8 @@ public:
     // ##Method purpose: Trigger a chat completion request.
     void requestChat(const QJsonArray &messages);
 
-    // ##Method purpose: Trigger a refactor request.
-    void requestRefactor(const QString &code);
+    // ##Method purpose: Prepares and sends an HTTP POST request for refactoring.
+    void requestRefactor(const QString &promptText);
 
 Q_SIGNALS:
     // ##Method purpose: Emitted when an inline completion response stream completes.

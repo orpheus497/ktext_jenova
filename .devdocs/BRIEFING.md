@@ -1,11 +1,11 @@
 # Project Briefing
 
-**Timestamp**: 2026-07-02 15:11
+**Timestamp**: 2026-07-02 15:50
 
-**Current Phase**: Phase 12 (Reference Replication & Crash Fixes)
+**Current Phase**: Phase 13 (Refactor Logic and Integration Fixes)
 
 **Status**: 
-Successfully replicated `kate-code` and `kdevcxx_with_ai` reference features natively without destroying the existing codebase. Fixed typing crashes in `AiCompletionModel`.
+User reported that AI Refactor logic is broken, produces hallucinations (like C segfault errors), chat lacks open file context, and the plugin reinvents the context menu instead of using KTextEditor's native XMLGUI popup menu.
 
 **Next Immediate Objective**: 
-Wait for user feedback on the non-destructive replication.
+Present implementation plan to fix the context logic, replace hacky C++ context menus with native `ktexteditor_popup` XMLGUI, and add a user prompt for refactoring instructions. Waiting for user approval on the plan.

@@ -36,9 +36,6 @@ private Q_SLOTS:
     // ##Method purpose: Slot triggered by the "AI Refactor" action in the tools menu.
     void requestAiRefactor();
 
-    // ##Method purpose: Slot to insert actions into the view's context menu.
-    void onContextMenuAboutToShow(KTextEditor::View *view, QMenu *menu);
-
     // ##Method purpose: Slot triggered when the LLM returns refactored text.
     void onRefactorReceived(const QString &text);
 

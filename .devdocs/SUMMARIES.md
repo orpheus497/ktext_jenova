@@ -1,5 +1,8 @@
 # Historical Session Summaries
 
+**Timestamp**: 2026-07-02 15:52
+* **Phase 13**: Refactored the core AI context engine to inject full document text rather than just file paths, resolving hallucinated LLM responses during refactoring. Overhauled the context menu architecture by replacing the `QMenu` override with standard native XMLGUI (`ktexteditor_popup`), ensuring deep IDE compliance. Added a rich `QInputDialog` to the refactor flow to allow explicit user instructions. Recompiled successfully.
+
 **Timestamp**: 2026-07-02 15:14
 * **Phase 12**: Performed a clean, non-destructive replication of `kate-code` chat autocompletion and `kdevcxx_with_ai` context menu logic. Resolved severe `KTextEditor` live-typing crashes by replacing invalid `beginResetModel()` calls with granular model insertion methods, preventing Qt segfaults during asynchronous AI generation. Successfully recompiled without external dependencies.
 

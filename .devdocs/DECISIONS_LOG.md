@@ -1,5 +1,15 @@
 # Decisions Log
 
+**Timestamp**: 2026-07-02 15:52
+
+## Architecture: Native KTextEditor Menus
+* **Decision**: Replace `QMenu::addAction` in the `contextMenuAboutToShow` signal with native XMLGUI `<Menu name="ktexteditor_popup">`.
+* **Justification**: Using KDE's XMLGUI framework correctly integrates the action into Kate/KDevelop without fragile code hooks, adhering strictly to the official KTextEditor plugin development process and preventing "reinventing the wheel".
+
+## UX: Refactor Prompting
+* **Decision**: Ask the user for explicit instructions via `QInputDialog` during a refactor request rather than silently issuing a generic "Refactor this code" prompt.
+* **Justification**: AI refactoring without constraints leads to hallucinations and invalid output (e.g., C segfault examples). Letting the user specify the operation (e.g., "Extract function", "Optimize") and injecting full file context resolves logic gaps and transforms the placeholder feature into a functional tool.
+
 **Timestamp**: 2026-07-02 15:21
 
 ## Architecture: Reference Replication

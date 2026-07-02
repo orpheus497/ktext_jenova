@@ -6,6 +6,7 @@
 #include <KTextEditor/Message>
 #include "../completion/AiCompletionModel.h"
 #include "../network/LlamaClient.h"
+#include "../context/ContextManager.h"
 
 #include <KActionCollection>
 #include <KLocalizedString>
@@ -13,6 +14,7 @@
 #include <QVBoxLayout>
 #include <KXMLGUIFactory>
 #include <QMenu>
+#include <QInputDialog>
 
 // ##Method purpose: Initializes the view, creates actions, tool views, and connects signals.
 AiPluginView::AiPluginView(AiPlugin *plugin, KTextEditor::MainWindow *mainWindow)
@@ -102,24 +104,28 @@ void AiPluginView::onActiveViewChanged(KTextEditor::View *view)
     // ##Condition purpose: Register on the new view.
     if (m_activeView) {
         m_activeView->registerCompletionModel(m_completionModel);
-        connect(m_activeView.data(), &KTextEditor::View::contextMenuAboutToShow, this, &AiPluginView::onContextMenuAboutToShow, Qt::UniqueConnection);
     }
 }
 
-// ##Method purpose: Adds the AI Refactor action to the context menu.
-void AiPluginView::onContextMenuAboutToShow(KTextEditor::View *view, QMenu *menu)
-{
-    if (!menu || !view) return;
-    if (m_refactorAction && !menu->actions().contains(m_refactorAction)) {
-        menu->addAction(m_refactorAction);
-    }
-}
-
-// ##Method purpose: Handles the execution of the refactor action, querying the backend instead of just showing a placeholder.
+// ##Method purpose: Handles the execution of the refactor action, asking user for instruction.
 void AiPluginView::requestAiRefactor()
 {
     // ##Condition purpose: Validate that a document and selection exist before processing.
     if (!m_activeView || !m_activeView->document() || !m_activeView->selection()) {
+        return;
+    }
+    
+    bool ok;
+    QString instruction = QInputDialog::getText(
+        m_mainWindow->window(),
+        i18n("AI Refactor"),
+        i18n("What should the AI do with this selection? (e.g. 'Optimize', 'Rename X to Y')"),
+        QLineEdit::Normal,
+        QString(),
+        &ok
+    );
+    
+    if (!ok || instruction.isEmpty()) {
         return;
     }
     
@@ -131,7 +137,10 @@ void AiPluginView::requestAiRefactor()
     m_currentRefactorRange = m_refactorDocument->newMovingRange(m_activeView->selectionRange());
     m_currentRefactorOriginalText = m_activeView->selectionText();
     
-    m_refactorClient->requestRefactor(m_currentRefactorOriginalText);
+    ContextManager contextMgr(this);
+    QString promptText = contextMgr.buildRefactorPrompt(instruction, m_currentRefactorOriginalText, m_activeView.data());
+    
+    m_refactorClient->requestRefactor(promptText);
 }
 
 // ##Method purpose: Handles the response from the LLM and shows the comparison view.

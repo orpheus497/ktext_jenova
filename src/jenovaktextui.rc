@@ -7,4 +7,7 @@
             <Action name="ai_refactor" />
         </Menu>
     </MenuBar>
+    <Menu name="ktexteditor_popup" noMerge="1">
+        <Action name="ai_refactor" />
+    </Menu>
 </gui>

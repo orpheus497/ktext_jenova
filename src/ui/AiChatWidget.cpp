@@ -56,13 +56,19 @@ void AiChatWidget::sendMessage(const QString &text)
     m_rawMarkdown += QStringLiteral("**You:**\n\n") + text + QStringLiteral("\n\n---\n\n**AI:**\n\n");
     renderMarkdown();
     
-    // ##Condition purpose: Inject the system prompt only on the very first message.
+    // ##Condition purpose: Inject or update the system prompt on every message to keep file context fresh.
+    QString sysPrompt = m_context->buildSystemPrompt(m_mainWindow->activeView());
     if (m_messageHistory.isEmpty()) {
-        QString sysPrompt = m_context->buildSystemPrompt(m_mainWindow->activeView());
         QJsonObject sysMsg;
         sysMsg[QStringLiteral("role")] = QStringLiteral("system");
         sysMsg[QStringLiteral("content")] = sysPrompt;
         m_messageHistory.append(sysMsg);
+    } else {
+        QJsonObject sysMsg = m_messageHistory.first().toObject();
+        if (sysMsg[QStringLiteral("role")].toString() == QStringLiteral("system")) {
+            sysMsg[QStringLiteral("content")] = sysPrompt;
+            m_messageHistory.replace(0, sysMsg);
+        }
     }
     
     QJsonObject userMsg;

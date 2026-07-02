@@ -76,14 +76,13 @@ void LlamaClient::requestChat(const QJsonArray &messages)
 }
 
 // ##Method purpose: Prepares and sends an HTTP POST request for refactoring.
-void LlamaClient::requestRefactor(const QString &code)
+void LlamaClient::requestRefactor(const QString &promptText)
 {
     QUrl url(m_endpointUrl + QStringLiteral("/completion"));
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, QByteArray("application/json"));
 
     QJsonObject json;
-    QString promptText = QStringLiteral("Refactor the following code:\n```\n") + code + QStringLiteral("\n```\nResult:\n```\n");
     json[QStringLiteral("prompt")] = promptText;
     json[QStringLiteral("n_predict")] = 512;
     json[QStringLiteral("temperature")] = 0.2;

@@ -466,6 +466,7 @@ src/CMakeFiles/jenovaktext.dir/plugin/AiPluginView.cpp.o: \
  /usr/include/qt6/QtCore/QIODevice \
  /usr/include/qt6/QtNetwork/QNetworkRequest \
  /usr/include/qt6/QtNetwork/QNetworkAccessManager \
+ /home/orpheus497/Documents/Projects/ktext_jenova/src/plugin/../context/ContextManager.h \
  /usr/include/KF6/KXmlGui/KActionCollection \
  /usr/include/KF6/KXmlGui/kactioncollection.h \
  /usr/include/KF6/KConfigWidgets/KStandardAction \
@@ -508,4 +509,10 @@ src/CMakeFiles/jenovaktext.dir/plugin/AiPluginView.cpp.o: \
  /usr/include/qt6/QtWidgets/qlayoutitem.h \
  /usr/include/qt6/QtWidgets/qgridlayout.h \
  /usr/include/KF6/KXmlGui/KXMLGUIFactory \
- /usr/include/KF6/KXmlGui/kxmlguifactory.h
+ /usr/include/KF6/KXmlGui/kxmlguifactory.h \
+ /usr/include/qt6/QtWidgets/QInputDialog \
+ /usr/include/qt6/QtWidgets/qinputdialog.h \
+ /usr/include/qt6/QtWidgets/qlineedit.h \
+ /usr/include/qt6/QtWidgets/qframe.h /usr/include/qt6/QtGui/qtextcursor.h \
+ /usr/include/qt6/QtGui/qtextdocument.h \
+ /usr/include/qt6/QtWidgets/qdialog.h

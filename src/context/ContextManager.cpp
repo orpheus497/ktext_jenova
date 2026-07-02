@@ -70,6 +70,9 @@ QString ContextManager::buildSystemPrompt(KTextEditor::View *view) const
         }
         
         prompt += QStringLiteral("\nCurrent file: ") + view->document()->url().toLocalFile() + QStringLiteral("\n");
+        prompt += QStringLiteral("\n--- File Content ---\n```\n");
+        prompt += view->document()->text();
+        prompt += QStringLiteral("\n```\n");
         
         // ##Condition purpose: Inject the user's active text selection into the prompt context.
         if (view->selection()) {
@@ -78,6 +81,28 @@ QString ContextManager::buildSystemPrompt(KTextEditor::View *view) const
             prompt += QStringLiteral("\n```\n");
         }
     }
+    
+    return prompt;
+}
+
+// ##Method purpose: Builds a context-aware prompt for the AI refactoring action.
+QString ContextManager::buildRefactorPrompt(const QString &instruction, const QString &code, KTextEditor::View *view) const
+{
+    QString prompt = QStringLiteral("You are an expert developer. ");
+    
+    if (view && view->document()) {
+        prompt += QStringLiteral("You are working in the file: ") + view->document()->url().toLocalFile() + QStringLiteral("\n\n");
+        prompt += QStringLiteral("Here is the full content of the file for context:\n```\n");
+        prompt += view->document()->text();
+        prompt += QStringLiteral("\n```\n\n");
+    }
+    
+    prompt += QStringLiteral("The user has selected the following code to modify:\n```\n");
+    prompt += code;
+    prompt += QStringLiteral("\n```\n\n");
+    
+    prompt += QStringLiteral("Instruction: ") + instruction + QStringLiteral("\n\n");
+    prompt += QStringLiteral("Please output ONLY the resulting modified code block to replace the selection. Do not include any conversational text or markdown wrappers in your output. Only raw code.");
     
     return prompt;
 }

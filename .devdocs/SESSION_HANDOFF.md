@@ -1,5 +1,12 @@
 # Session Handoff Log
 
+**Timestamp**: 2026-07-02 15:52
+## Phase 13 Refactor Logic and Integration Fixes Session
+* **Accomplishments**: Replaced the hacky C++ context menu hook with a native KTextEditor XMLGUI `ktexteditor_popup` injection in `jenovaktextui.rc`. Updated `ContextManager` to inject the entire active document text into the system prompt. Refactored `AiChatWidget` to refresh the system prompt on every user message to prevent stale context when switching tabs. Upgraded `AiPluginView` refactoring action to prompt the user with a `QInputDialog` to specify the exact refactoring task (e.g. "Optimize", "Rename X"), feeding a comprehensive, context-aware prompt into `LlamaClient` instead of the previous hallucination-prone hardcoded prompt. Compiled successfully.
+* **Modified Files**: `src/context/ContextManager.h`, `src/context/ContextManager.cpp`, `src/ui/AiChatWidget.cpp`, `src/jenovaktextui.rc`, `src/plugin/AiPluginView.h`, `src/plugin/AiPluginView.cpp`, `src/network/LlamaClient.h`, `src/network/LlamaClient.cpp`.
+* **Decisions**: Use native XMLGUI `<Menu name="ktexteditor_popup" noMerge="1">` for standard IDE context menus. Ask users for explicit refactoring instructions via QInputDialog rather than assuming a default action. Provide full file text for context to LLMs.
+* **Next Steps**: Await user testing of the refactor context and chat context.
+
 **Timestamp**: 2026-07-02 15:27
 ## Phase 12 Reference Replication & Crash Fixes Session
 * **Accomplishments**: Successfully completed a non-destructive replication of reference plugin features. Fixed the stubborn live-typing crashes in `AiCompletionModel` by removing invalid `rowCount()` overrides and utilizing KTextEditor's strict `setRowCount()` and `beginResetModel()` API, preventing internal KF6 tree recursion segfaults. Resolved a secondary null-pointer segfault triggered when rapidly aborting QNetworkReply requests in `LlamaClient`. Upgraded the chat sidebar to support `/command` and `@file` autocompletion by natively migrating `kate-code`'s `CommandTextEdit` into a custom `AiChatInputWidget`. Replicated `kdevcxx_with_ai`'s right-click context menu logic for "AI: Refactor Selection" directly into `AiPluginView`. Successfully rebuilt and installed the plugin.
