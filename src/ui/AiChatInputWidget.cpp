@@ -187,9 +187,9 @@ void AiChatInputWidget::setPromptRunning(bool running)
     m_promptRunning = running;
     m_sendButton->setEnabled(!running);
     if (running) {
-        m_sendButton->setToolTip(QStringLiteral("Waiting for AI response..."));
+        m_sendButton->setToolTip(i18n("Waiting for AI response..."));
     } else {
-        m_sendButton->setToolTip(QStringLiteral("Send message (Enter)"));
+        m_sendButton->setToolTip(i18n("Send message (Enter)"));
     }
 }
 
