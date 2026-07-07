@@ -25,10 +25,14 @@ find_package(Qt6 REQUIRED COMPONENTS
     Core
     Widgets
     Network
+    Test
 )
 
 find_package(KDevPlatform 6.0 REQUIRED)
 
 add_subdirectory(src)
+
+enable_testing()
+add_subdirectory(tests)
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
