@@ -6,8 +6,9 @@ set(TestCommandTextEdit_SRCS
 )
 
 add_executable(TestCommandTextEdit ${TestCommandTextEdit_SRCS})
+set_target_properties(TestCommandTextEdit PROPERTIES AUTOMOC ON)
 
-target_include_directories(TestCommandTextEdit PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(TestCommandTextEdit PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
 target_link_libraries(TestCommandTextEdit PRIVATE
     KDev::Interfaces
@@ -15,6 +16,7 @@ target_link_libraries(TestCommandTextEdit PRIVATE
     KDev::Project
     KDev::Shell
     KDev::Language
+    KF6::I18n
     Qt6::Core
     Qt6::Widgets
     Qt6::Network

@@ -46,10 +46,9 @@ void TestCommandTextEdit::testCompletionUnderCursor_data()
                                     << static_cast<int>(CommandTextEdit::File) << "@file" << "file" << 6;
 
     // '@' inside text (no space before)
-    // Based on logic, if "hello@file", going back it will find '@' and no space before it.
-    // The current logic returns type=File with prefix starting from '@'.
+    // Avoid triggering completion on emails like "user@domain.com"
     QTest::newRow("at_inside_text") << "hello@file" << 10
-                                    << static_cast<int>(CommandTextEdit::File) << "@file" << "file" << 5;
+                                    << static_cast<int>(CommandTextEdit::None) << "" << "" << -1;
 
     // Space after '@' - cursor right after space
     QTest::newRow("space_after_at") << "@ file" << 2
