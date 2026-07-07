@@ -53,15 +53,15 @@ QString ContextManager::getProjectRoot(KTextEditor::Document *doc) const
         QString currentPath = dir.absolutePath();
 
         // ##Condition purpose: Check if we have a valid cached root for this directory
-        if (s_projectRootCache.contains(currentPath)) {
-            const CacheEntry& entry = s_projectRootCache.value(currentPath);
+        auto it = s_projectRootCache.constFind(currentPath);
+        if (it != s_projectRootCache.constEnd()) {
+            CacheEntry entry = it.value(); // Copy to avoid iterator invalidation during inserts
             if (now - entry.timestamp < CACHE_TTL_MS) {
-                QString cachedRoot = entry.rootPath;
                 // Cache for all visited directories on the way up
                 for (const QString& visited : visitedDirs) {
-                    s_projectRootCache.insert(visited, {cachedRoot, now});
+                    s_projectRootCache.insert(visited, {entry.rootPath, entry.timestamp});
                 }
-                return cachedRoot;
+                return entry.rootPath;
             }
         }
 
