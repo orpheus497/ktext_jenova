@@ -162,3 +162,8 @@
 **Timestamp**: 2026-07-02 12:39
 ## Initial Setup Session
 * **Accomplishments**: Read AGENTS.md, initialized `.devdocs/`.
+
+## 2026-07-07 16:51
+- **Accomplished:** Implemented SSE token batching in `src/network/LlamaClient.cpp` to prevent O(N^2) markdown re-renders in the UI.
+- **Modified:** `src/network/LlamaClient.cpp`. Added explanatory comments and local `QString` buffer to batch tokens.
+- **Next Steps:** Proceed to next unassigned task.
