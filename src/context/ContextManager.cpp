@@ -5,6 +5,7 @@
 #include <QFileInfo>
 #include <QTextStream>
 #include <QDateTime>
+#include <QReadWriteLock>
 #include <interfaces/icore.h>
 #include <interfaces/iprojectcontroller.h>
 #include <interfaces/iproject.h>
@@ -55,17 +56,25 @@ QString ContextManager::getAgentsInstruction(const QString &projectRoot) const
         QStringLiteral(".agents/AGENTS.md")
     };
 
+    struct AgentCache {
+        QReadWriteLock lock;
+        QHash<QString, QString> content;
+        QHash<QString, QDateTime> lastModified;
+    };
+    static AgentCache cache;
+
     // ##Loop purpose: Check all possible locations for the AGENTS.md file.
     for (const auto &candidate : candidates) {
         QString filePath = QDir(projectRoot).filePath(candidate);
         QFileInfo info(filePath);
+        QDateTime lastMod = info.lastModified();
         
-        if (info.exists()) {
-            QDateTime lastMod = info.lastModified();
-
-            // ##Condition purpose: Return cached content if the file hasn't been modified.
-            if (m_agentLastModified.contains(filePath) && m_agentLastModified[filePath] == lastMod) {
-                return m_agentCache[filePath];
+        if (lastMod.isValid()) {
+            {
+                QReadLocker locker(&cache.lock);
+                if (cache.lastModified.value(filePath) == lastMod) {
+                    return cache.content.value(filePath);
+                }
             }
 
             QFile file(filePath);
@@ -74,8 +83,10 @@ QString ContextManager::getAgentsInstruction(const QString &projectRoot) const
             if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
                 QTextStream in(&file);
                 QString content = in.readAll();
-                m_agentLastModified[filePath] = lastMod;
-                m_agentCache[filePath] = content;
+
+                QWriteLocker locker(&cache.lock);
+                cache.lastModified[filePath] = lastMod;
+                cache.content[filePath] = content;
                 return content;
             }
         }
