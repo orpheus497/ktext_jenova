@@ -28,7 +28,7 @@ QString ContextManager::getProjectRoot(KTextEditor::Document *doc) const
 
 QString ContextManager::getProjectRoot(const QUrl &url) const
 {
-    if (url.isEmpty()) {
+    if (url.isEmpty() || !url.isLocalFile()) {
         return QString();
     }
 
