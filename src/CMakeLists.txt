@@ -22,3 +22,5 @@ target_link_libraries(kdevllm
     Qt6::Widgets
     Qt6::Network
 )
+
+add_subdirectory(tests)
