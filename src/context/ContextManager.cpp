@@ -89,7 +89,7 @@ QString ContextManager::buildSystemPrompt(KTextEditor::View *view) const
         
         if (!agentsInst.isEmpty()) {
             prompt += QStringLiteral("Follow these project-specific instructions from AGENTS.md:\n");
-            prompt += agentsInst % QChar('\n');
+            prompt += agentsInst % QLatin1Char('\n');
         }
         
         prompt += QStringLiteral("\nCurrent file: ") % view->document()->url().toLocalFile() % QChar('\n');
