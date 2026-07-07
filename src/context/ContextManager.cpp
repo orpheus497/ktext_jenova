@@ -133,7 +133,7 @@ QString ContextManager::buildRefactorPrompt(const QString &instruction, const QS
             }
         }
         
-        prompt += QStringLiteral("You are working in the file: ") % view->document()->url().toLocalFile() % QStringLiteral("\n\n");
+        prompt += QStringLiteral("You are working in the file: ") % view->document()->url().toLocalFile() % QLatin1String("\n\n");
         prompt += QStringLiteral("Here is the full content of the file for context:\n```\n");
         prompt += view->document()->text();
         prompt += QStringLiteral("\n```\n\n");
