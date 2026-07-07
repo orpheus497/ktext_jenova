@@ -34,6 +34,12 @@ QString LlamaClient::endpointUrl() const
 void LlamaClient::requestCompletion(const QString &prefix, const QString &suffix)
 {
     QUrl url(m_endpointUrl + QStringLiteral("/completion"));
+    if (url.scheme() == QStringLiteral("http") && url.host() != QStringLiteral("127.0.0.1") && url.host() != QStringLiteral("localhost") && url.host() != QStringLiteral("::1")) {
+        if (!m_insecureWarningEmitted) {
+            Q_EMIT warningOccurred(QStringLiteral("Security Warning: Using HTTP with a non-loopback endpoint exposes your code to network interception. Consider using HTTPS."));
+            m_insecureWarningEmitted = true;
+        }
+    }
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, QByteArray("application/json"));
 
@@ -58,6 +64,12 @@ void LlamaClient::requestCompletion(const QString &prefix, const QString &suffix
 void LlamaClient::requestChat(const QJsonArray &messages)
 {
     QUrl url(m_endpointUrl + QStringLiteral("/chat/completions"));
+    if (url.scheme() == QStringLiteral("http") && url.host() != QStringLiteral("127.0.0.1") && url.host() != QStringLiteral("localhost") && url.host() != QStringLiteral("::1")) {
+        if (!m_insecureWarningEmitted) {
+            Q_EMIT warningOccurred(QStringLiteral("Security Warning: Using HTTP with a non-loopback endpoint exposes your code to network interception. Consider using HTTPS."));
+            m_insecureWarningEmitted = true;
+        }
+    }
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, QByteArray("application/json"));
 
@@ -79,6 +91,12 @@ void LlamaClient::requestChat(const QJsonArray &messages)
 void LlamaClient::requestRefactor(const QString &promptText)
 {
     QUrl url(m_endpointUrl + QStringLiteral("/completion"));
+    if (url.scheme() == QStringLiteral("http") && url.host() != QStringLiteral("127.0.0.1") && url.host() != QStringLiteral("localhost") && url.host() != QStringLiteral("::1")) {
+        if (!m_insecureWarningEmitted) {
+            Q_EMIT warningOccurred(QStringLiteral("Security Warning: Using HTTP with a non-loopback endpoint exposes your code to network interception. Consider using HTTPS."));
+            m_insecureWarningEmitted = true;
+        }
+    }
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, QByteArray("application/json"));
 

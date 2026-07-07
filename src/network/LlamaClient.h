@@ -48,6 +48,9 @@ Q_SIGNALS:
     // ##Method purpose: Emitted when a network or parsing error occurs.
     void errorOccurred(const QString &errorString);
 
+    // ##Method purpose: Emitted when a security warning occurs.
+    void warningOccurred(const QString &warningString);
+
 private Q_SLOTS:
     // ##Method purpose: Callback for when the completion HTTP request receives data chunks.
     void onCompletionReadyRead();
@@ -75,4 +78,5 @@ private:
     QNetworkReply *m_chatReply = nullptr;
     QNetworkReply *m_completionReply = nullptr;
     QNetworkReply *m_refactorReply = nullptr;
+    bool m_insecureWarningEmitted = false;
 };

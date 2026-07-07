@@ -162,3 +162,18 @@
 **Timestamp**: 2026-07-02 12:39
 ## Initial Setup Session
 * **Accomplishments**: Read AGENTS.md, initialized `.devdocs/`.
+
+## 2026-07-07 05:48
+**Accomplishments**:
+- Added a security warning mechanism to `LlamaClient` and `AiChatWidget` that warns the user if an insecure, non-loopback HTTP endpoint is being used, exposing plaintext data over the network.
+- Modified `src/network/LlamaClient.h` and `src/network/LlamaClient.cpp` to introduce a check for insecure connections before making requests in `requestCompletion`, `requestChat`, and `requestRefactor`. Emitted `warningOccurred` once per session via a new internal flag.
+- Modified `src/ui/AiChatWidget.h` and `src/ui/AiChatWidget.cpp` to listen for the `warningOccurred` signal and append it in a highly-visible Markdown block in the main chat history.
+
+**Modified Files**:
+- `src/network/LlamaClient.h`
+- `src/network/LlamaClient.cpp`
+- `src/ui/AiChatWidget.h`
+- `src/ui/AiChatWidget.cpp`
+
+**Next Steps**:
+- Monitor for feedback on whether this warning is obtrusive to users in mixed environments, or if they need a "do not show again" persistent option in settings.
