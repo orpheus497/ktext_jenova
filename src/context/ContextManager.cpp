@@ -64,11 +64,9 @@ QString ContextManager::getAgentsInstruction(const QString &projectRoot) const
             QDateTime lastModified = fileInfo.lastModified();
 
             // Check cache first
-            if (m_agentsCache.contains(filePath)) {
-                const AgentsCacheEntry& entry = m_agentsCache.value(filePath);
-                if (entry.lastModified == lastModified) {
-                    return entry.content;
-                }
+            auto it = m_agentsCache.constFind(filePath);
+            if (it != m_agentsCache.constEnd() && it.value().lastModified == lastModified) {
+                return it.value().content;
             }
 
             QFile file(filePath);
