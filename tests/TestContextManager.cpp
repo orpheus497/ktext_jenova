@@ -106,5 +106,5 @@ private slots:
     }
 };
 
-QTEST_MAIN(TestContextManager)
+QTEST_GUILESS_MAIN(TestContextManager)
 #include "TestContextManager.moc"

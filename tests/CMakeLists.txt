@@ -3,6 +3,7 @@ set(TestContextManager_SRCS
     ../src/context/ContextManager.cpp
 )
 
+find_package(Qt6 REQUIRED COMPONENTS Test)
 add_executable(TestContextManager ${TestContextManager_SRCS})
 
 target_link_libraries(TestContextManager
