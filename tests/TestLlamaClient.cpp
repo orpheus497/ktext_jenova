@@ -58,17 +58,32 @@ private slots:
         QTcpSocket *socket = m_server->nextPendingConnection();
         QVERIFY(socket != nullptr);
 
-        // Wait for data to arrive
-        bool hasData = false;
-        for (int i = 0; i < 10; ++i) {
+        // Wait for the full HTTP request to arrive
+        QByteArray requestData;
+        bool hasFullRequest = false;
+        for (int i = 0; i < 20; ++i) {
             if (socket->bytesAvailable() > 0) {
-                hasData = true;
-                break;
+                requestData.append(socket->readAll());
+            }
+            int bodyIndex = requestData.indexOf("\r\n\r\n");
+            if (bodyIndex != -1) {
+                int contentLength = 0;
+                int clIndex = requestData.indexOf("Content-Length:");
+                if (clIndex != -1 && clIndex < bodyIndex) {
+                    int valStart = clIndex + 15;
+                    int valEnd = requestData.indexOf("\r\n", valStart);
+                    if (valEnd != -1) {
+                        contentLength = requestData.mid(valStart, valEnd - valStart).trimmed().toInt();
+                    }
+                }
+                if (requestData.size() >= bodyIndex + 4 + contentLength) {
+                    hasFullRequest = true;
+                    break;
+                }
             }
             QTest::qWait(100);
         }
-        QVERIFY(hasData);
-        QByteArray requestData = socket->readAll();
+        QVERIFY(hasFullRequest);
 
         // ##Step purpose: Verify HTTP POST line and headers
         QVERIFY(requestData.startsWith("POST /completion HTTP/1.1\r\n"));
@@ -133,17 +148,32 @@ private slots:
         QTcpSocket *socket = m_server->nextPendingConnection();
         QVERIFY(socket != nullptr);
 
-        // Wait for data
-        bool hasData = false;
-        for (int i = 0; i < 10; ++i) {
+        // Wait for the full HTTP request to arrive
+        QByteArray requestData;
+        bool hasFullRequest = false;
+        for (int i = 0; i < 20; ++i) {
             if (socket->bytesAvailable() > 0) {
-                hasData = true;
-                break;
+                requestData.append(socket->readAll());
+            }
+            int bodyIndex = requestData.indexOf("\r\n\r\n");
+            if (bodyIndex != -1) {
+                int contentLength = 0;
+                int clIndex = requestData.indexOf("Content-Length:");
+                if (clIndex != -1 && clIndex < bodyIndex) {
+                    int valStart = clIndex + 15;
+                    int valEnd = requestData.indexOf("\r\n", valStart);
+                    if (valEnd != -1) {
+                        contentLength = requestData.mid(valStart, valEnd - valStart).trimmed().toInt();
+                    }
+                }
+                if (requestData.size() >= bodyIndex + 4 + contentLength) {
+                    hasFullRequest = true;
+                    break;
+                }
             }
             QTest::qWait(100);
         }
-        QVERIFY(hasData);
-        QByteArray requestData = socket->readAll();
+        QVERIFY(hasFullRequest);
 
         int bodyIndex = requestData.indexOf("\r\n\r\n");
         QVERIFY(bodyIndex != -1);
