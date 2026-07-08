@@ -49,8 +49,24 @@ QString ContextManager::getProjectRoot(KTextEditor::Document *doc) const
     QStringList visitedDirs;
     qint64 now = QDateTime::currentMSecsSinceEpoch();
 
-    while (dir.absolutePath() != QStringLiteral("/")) {
+    // Clean up stale entries occasionally (simple opportunistic cleanup)
+    if (qrand() % 100 == 0) {
+        auto it = s_projectRootCache.begin();
+        while (it != s_projectRootCache.end()) {
+            if (now - it.value().timestamp >= CACHE_TTL_MS) {
+                it = s_projectRootCache.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
+    bool isRoot = false;
+    while (!isRoot) {
         QString currentPath = dir.absolutePath();
+
+        // Check if we reached the filesystem root (platform-agnostic)
+        isRoot = (dir.isRoot());
 
         // ##Condition purpose: Check if we have a valid cached root for this directory
         auto it = s_projectRootCache.constFind(currentPath);
@@ -62,6 +78,9 @@ QString ContextManager::getProjectRoot(KTextEditor::Document *doc) const
                     s_projectRootCache.insert(visited, {entry.rootPath, entry.timestamp});
                 }
                 return entry.rootPath;
+            } else {
+                // Evict the stale entry
+                s_projectRootCache.remove(currentPath);
             }
         }
 
@@ -75,7 +94,12 @@ QString ContextManager::getProjectRoot(KTextEditor::Document *doc) const
             }
             return rootPath;
         }
-        dir.cdUp();
+
+        if (!isRoot) {
+            if (!dir.cdUp()) {
+                break; // If we can't go up anymore despite not being root
+            }
+        }
     }
 
     // Cache empty result if no root found
