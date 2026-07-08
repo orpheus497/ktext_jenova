@@ -1,21 +1,14 @@
-set(TestContextManager_SRCS
-    TestContextManager.cpp
-    ../src/context/ContextManager.cpp
+set(CMAKE_AUTOMOC ON)
+
+add_executable(TestLlamaClient
+    TestLlamaClient.cpp
 )
 
-find_package(Qt6 REQUIRED COMPONENTS Test)
-add_executable(TestContextManager ${TestContextManager_SRCS})
+target_include_directories(TestLlamaClient PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/mocks)
 
-target_link_libraries(TestContextManager
+target_link_libraries(TestLlamaClient
+    LlamaClientObj
     Qt6::Test
-    Qt6::Core
-    Qt6::Widgets
-    Qt6::Network
-    KDev::Interfaces
-    KDev::Util
-    KDev::Project
-    KDev::Shell
-    KDev::Language
 )
 
-add_test(NAME TestContextManager COMMAND TestContextManager)
+add_test(NAME TestLlamaClient COMMAND TestLlamaClient)
