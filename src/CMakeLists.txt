@@ -19,6 +19,10 @@ target_link_libraries(kdevllm_core
     Qt6::Network
 )
 
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
+
 kdevplatform_add_plugin(kdevllm
     JSON kdevllm.json
     SOURCES KDevLLMPlugin.cpp
@@ -35,7 +39,3 @@ target_link_libraries(kdevllm
     Qt6::Widgets
     Qt6::Network
 )
-
-if(BUILD_TESTING)
-    add_subdirectory(tests)
-endif()
