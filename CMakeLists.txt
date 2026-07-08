@@ -33,6 +33,10 @@ enable_testing()
 if(BUILD_TESTING)
     # Testing enabled
 endif()
+include(CTest)
 add_subdirectory(src)
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
