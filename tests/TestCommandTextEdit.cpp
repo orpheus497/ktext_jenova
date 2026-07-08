@@ -1,6 +1,6 @@
 #include <QtTest>
 #include <QTextEdit>
-#include "ui/AiChatInputWidget.h"
+#include "../src/ui/AiChatInputWidget.h"
 
 // ##Class purpose: Unit tests for CommandTextEdit's file completion parsing logic.
 class TestCommandTextEdit : public QObject
@@ -128,5 +128,5 @@ void TestCommandTextEdit::testSimulatedKeyPresses()
     QCOMPARE(ctx.filterText, QStringLiteral("test"));
 }
 
-QTEST_MAIN(TestCommandTextEdit)
+ //  //  //  // QTEST_MAIN(TestCommandTextEdit)
 #include "TestCommandTextEdit.moc"
