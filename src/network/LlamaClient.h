@@ -71,6 +71,8 @@ private Q_SLOTS:
     void onRefactorFinished();
 
 private:
+    void checkInsecureEndpoint(const QString &scheme, const QString &host);
+
     QNetworkAccessManager *m_nam;
     QString m_endpointUrl = QStringLiteral("http://localhost:8080");
     QString m_completionBuffer;

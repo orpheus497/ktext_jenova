@@ -177,3 +177,15 @@
 
 **Next Steps**:
 - Monitor for feedback on whether this warning is obtrusive to users in mixed environments, or if they need a "do not show again" persistent option in settings.
+
+## 2026-07-08 00:45
+**Accomplishments**:
+- Applied pull request feedback by extracting `checkInsecureEndpoint` into a separate private method inside `LlamaClient` to prevent code duplication across `requestCompletion`, `requestChat`, and `requestRefactor`.
+- Removed duplicate string prefix logic in the emitted string and updated `setEndpointUrl` to successfully reset `m_insecureWarningEmitted`.
+
+**Modified Files**:
+- `src/network/LlamaClient.h`
+- `src/network/LlamaClient.cpp`
+
+**Next Steps**:
+- Await PR merge.

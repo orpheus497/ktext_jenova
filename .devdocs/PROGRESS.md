@@ -32,3 +32,4 @@
 * **Reference Replication & Crash Fixes (Phase 12)**: Complete (Fixed `AiCompletionModel` live-typing crash by implementing `MatchRole`. Natively integrated `AiChatInputWidget` and context menu logic from reference projects).
 * **Refactor Logic and Integration Fixes (Phase 13)**: Complete (Upgraded chat and refactor contexts to use full file content, replaced C++ context menus with native XMLGUI, and added user prompts for refactor operations).
 - **2026-07-07 05:48**: Fixed security vulnerability with default endpoint protocol. Added HTTP insecurity warning on non-loopback IPs to `LlamaClient` and `AiChatWidget`.
+- **2026-07-08 00:45**: Refactored security warning mechanism into a private helper method and addressed code review comments.
