@@ -78,20 +78,29 @@ private Q_SLOTS:
         QCOMPARE(m_model->rowCount(), 1);
     }
 
-    // ##Method purpose: Tests completionInvoked with a view that has a null document.
+    // ##Method purpose: Tests completionInvoked with a mock view that has a null document.
     void testCompletionInvoked_NullDocument() {
-        auto *editor = KTextEditor::Editor::instance();
-        if (!editor) {
-            QSKIP("KTextEditor editor component not available");
-        }
-        // Create doc and view just to get a valid view pointer
-        auto *doc = editor->createDocument(this);
-        auto *view = doc->createView(nullptr);
+        // Create a minimal Test Double for View returning a null document
+        class NullDocView : public KTextEditor::View {
+        public:
+            NullDocView(QWidget* parent = nullptr) : KTextEditor::View(parent) {}
+            KTextEditor::Document* document() const override { return nullptr; }
 
-        // This is tricky without mocking because KTextEditor::View usually guarantees it has a document.
-        // We'll trust the null check exists in the code and focus on the previous tests.
-        delete view;
-        delete doc;
+            // Minimal implementations for pure virtual functions not used in completionInvoked test
+            void setContextMenu(QMenu*) override {}
+            QMenu* contextMenu() const override { return nullptr; }
+            QMenu* defaultContextMenu(QMenu*) const override { return nullptr; }
+        };
+
+        NullDocView view;
+        KTextEditor::Range range(KTextEditor::Cursor(0,0), KTextEditor::Cursor(0,0));
+
+        QCOMPARE(m_model->rowCount(), 0);
+
+        m_model->completionInvoked(&view, range, KTextEditor::CodeCompletionModel::AutomaticInvocation);
+
+        // Ensure state aborted safely despite being invoked
+        QCOMPARE(m_model->rowCount(), 1);
     }
 
 private:

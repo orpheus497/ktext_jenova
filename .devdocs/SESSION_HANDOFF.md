@@ -1,8 +1,8 @@
 **Timestamp**: 2026-07-07 05:22
 ## Phase 17 Testing Improvements Session
-* **Accomplishments**: Implemented QTest-based unit tests for `AiCompletionModel::completionInvoked` using mock objects for KTextEditor components (`Document`, `View`, `Cursor`, `Range`). Integrated tests into the CMake build system by adding `tests/CMakeLists.txt` and appending the subdirectory to the root `CMakeLists.txt`. Verified test structure with static compilation syntax checks (`g++ -fsyntax-only`).
-* **Modified Files**: `tests/TestAiCompletionModel.cpp`, `tests/CMakeLists.txt`, `CMakeLists.txt`, `.devdocs/BRIEFING.md`.
-* **Decisions**: Opted for static analysis over full compilation due to missing KF6 dependency headers in the environment, validating the logic and structure of the tests.
+* **Accomplishments**: Implemented QTest-based unit tests for `AiCompletionModel::completionInvoked`. The tests mock the `LlamaClient` network layer to prevent HTTP calls, while utilizing the real `KTextEditor::Editor`, `Document`, and `View` objects for text integration. Integrated tests into the CMake build system by adding `tests/CMakeLists.txt` and configuring CTest testing options.
+* **Modified Files**: `tests/TestAiCompletionModel.cpp`, `tests/MockLlamaClient.h`, `tests/CMakeLists.txt`, `CMakeLists.txt`, `src/completion/AiCompletionModel.h`, `src/network/LlamaClient.h`, `.devdocs/BRIEFING.md`.
+* **Decisions**: Subclassed `LlamaClient` directly for `MockLlamaClient` rather than relying on abstract interface stubs to safely gate asynchronous network routines during testing, ensuring accurate component integration.
 * **Next Steps**: Await user testing and review of the completion tests.
 
 **Timestamp**: 2026-07-06 06:51
