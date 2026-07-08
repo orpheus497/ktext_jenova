@@ -15,11 +15,20 @@
 #include <language/duchain/declaration.h>
 #include <language/duchain/types/abstracttype.h>
 #include <util/path.h>
+#include <QHash>
+#include <QStringList>
+#include <QDateTime>
+#include <QRandomGenerator>
 #include <QStringBuilder>
 
-namespace {
-constexpr int PromptReserveCapacity = 8192;
-}
+struct CacheEntry {
+    QString rootPath;
+    qint64 timestamp;
+};
+
+// Static cache with TTL to avoid redundant directory traversal and disk I/O
+static QHash<QString, CacheEntry> s_projectRootCache;
+const qint64 CACHE_TTL_MS = 5000; // 5 seconds TTL
 
 // ##Method purpose: Constructor implementation.
 ContextManager::ContextManager(QObject *parent) : QObject(parent) {}
@@ -41,11 +50,67 @@ QString ContextManager::getProjectRoot(KTextEditor::Document *doc) const
     
     // Fallback to directory scanning if not in a KDevelop project
     QDir dir = QFileInfo(doc->url().toLocalFile()).absoluteDir();
-    while (dir.absolutePath() != QStringLiteral("/")) {
-        if (dir.exists(QStringLiteral(".git")) || dir.exists(QStringLiteral("CMakeLists.txt"))) {
-            return dir.absolutePath();
+    QStringList visitedDirs;
+    qint64 now = QDateTime::currentMSecsSinceEpoch();
+
+    // ##Step purpose: Clean up stale entries occasionally (simple opportunistic cleanup)
+    if (QRandomGenerator::global()->bounded(100) == 0) {
+        auto it = s_projectRootCache.begin();
+        while (it != s_projectRootCache.end()) {
+            if (now - it.value().timestamp >= CACHE_TTL_MS) {
+                it = s_projectRootCache.erase(it);
+            } else {
+                ++it;
+            }
         }
-        dir.cdUp();
+    }
+
+    bool isRoot = false;
+    // ##Loop purpose: Traverse up the directory tree until reaching the root or a project marker
+    while (!isRoot) {
+        QString currentPath = dir.absolutePath();
+
+        // Check if we reached the filesystem root (platform-agnostic)
+        isRoot = (dir.isRoot());
+
+        // ##Condition purpose: Check if we have a valid cached root for this directory
+        auto it = s_projectRootCache.constFind(currentPath);
+        if (it != s_projectRootCache.constEnd()) {
+            CacheEntry entry = it.value(); // Copy to avoid iterator invalidation during inserts
+            if (now - entry.timestamp < CACHE_TTL_MS) {
+                // Cache for all visited directories on the way up
+                for (const QString& visited : visitedDirs) {
+                    s_projectRootCache.insert(visited, {entry.rootPath, entry.timestamp});
+                }
+                return entry.rootPath;
+            } else {
+                // Evict the stale entry
+                s_projectRootCache.remove(currentPath);
+            }
+        }
+
+        visitedDirs.append(currentPath);
+
+        // ##Condition purpose: Check if the current directory contains project markers (.git or CMakeLists.txt)
+        if (dir.exists(QStringLiteral(".git")) || dir.exists(QStringLiteral("CMakeLists.txt"))) {
+            QString rootPath = dir.absolutePath();
+            // ##Loop purpose: Cache the resolved root for all directories visited on the way up
+            for (const QString& visited : visitedDirs) {
+                s_projectRootCache.insert(visited, {rootPath, now});
+            }
+            return rootPath;
+        }
+
+        if (!isRoot) {
+            if (!dir.cdUp()) {
+                break; // If we can't go up anymore despite not being root
+            }
+        }
+    }
+
+    // ##Loop purpose: Cache the empty result (no project root) for all visited directories to prevent redundant lookups
+    for (const QString& visited : visitedDirs) {
+        s_projectRootCache.insert(visited, {QString(), now});
     }
     return QString();
 }
@@ -101,9 +166,7 @@ QString ContextManager::getAgentsInstruction(const QString &projectRoot) const
 
 QString ContextManager::buildSystemPrompt(KTextEditor::View *view) const
 {
-    QString prompt;
-    prompt.reserve(PromptReserveCapacity); // Pre-allocate to reduce memory reallocations
-    prompt += QStringLiteral("You are an expert AI coding assistant integrated natively into the KDevelop IDE.\n");
+    QString prompt = QStringLiteral("You are an expert AI coding assistant integrated natively into the KDevelop IDE.\n");
     
     if (view && view->document()) {
         QString root = getProjectRoot(view->document());
@@ -113,17 +176,17 @@ QString ContextManager::buildSystemPrompt(KTextEditor::View *view) const
         if (pc) {
             KDevelop::IProject* proj = pc->findProjectForUrl(view->document()->url());
             if (proj) {
-                prompt += QStringLiteral("Project Name: ") % proj->name() % QChar('\n');
-                prompt += QStringLiteral("Project Root: ") % proj->path().toLocalFile() % QStringLiteral("\n\n");
+                prompt += QStringLiteral("Project Name: ") + proj->name() + QStringLiteral("\n");
+                prompt += QStringLiteral("Project Root: ") + proj->path().toLocalFile() + QStringLiteral("\n\n");
             }
         }
         
         if (!agentsInst.isEmpty()) {
             prompt += QStringLiteral("Follow these project-specific instructions from AGENTS.md:\n");
-            prompt += agentsInst % QChar('\n');
+            prompt += agentsInst + QStringLiteral("\n");
         }
         
-        prompt += QStringLiteral("\nCurrent file: ") % view->document()->url().toLocalFile() % QChar('\n');
+        prompt += QStringLiteral("\nCurrent file: ") + view->document()->url().toLocalFile() + QStringLiteral("\n");
         prompt += QStringLiteral("\n--- File Content ---\n```\n");
         prompt += view->document()->text();
         prompt += QStringLiteral("\n```\n");
@@ -138,9 +201,9 @@ QString ContextManager::buildSystemPrompt(KTextEditor::View *view) const
             KDevelop::DUChainUtils::ItemUnderCursor item = KDevelop::DUChainUtils::itemUnderCursor(view->document()->url(), view->selectionRange().start());
             if (item.declaration) {
                 prompt += QStringLiteral("\nSemantic Information (from KDevelop DUChain AST):\n");
-                prompt += QStringLiteral("- Declaration: ") % item.declaration->toString() % QChar('\n');
+                prompt += QStringLiteral("- Declaration: ") + item.declaration->toString() + QStringLiteral("\n");
                 if (item.declaration->abstractType()) {
-                    prompt += QStringLiteral("- Type: ") % item.declaration->abstractType()->toString() % QChar('\n');
+                    prompt += QStringLiteral("- Type: ") + item.declaration->abstractType()->toString() + QStringLiteral("\n");
                 }
             }
         }
@@ -151,20 +214,18 @@ QString ContextManager::buildSystemPrompt(KTextEditor::View *view) const
 
 QString ContextManager::buildRefactorPrompt(const QString &instruction, const QString &code, KTextEditor::View *view) const
 {
-    QString prompt;
-    prompt.reserve(PromptReserveCapacity); // Pre-allocate to reduce memory reallocations
-    prompt += QStringLiteral("You are an expert developer. ");
+    QString prompt = QStringLiteral("You are an expert developer. ");
     
     if (view && view->document()) {
         KDevelop::IProjectController* pc = KDevelop::ICore::self()->projectController();
         if (pc) {
             KDevelop::IProject* proj = pc->findProjectForUrl(view->document()->url());
             if (proj) {
-                prompt += QStringLiteral("Project Name: ") % proj->name() % QChar('\n');
+                prompt += QStringLiteral("Project Name: ") + proj->name() + QStringLiteral("\n");
             }
         }
         
-        prompt += QStringLiteral("You are working in the file: ") % view->document()->url().toLocalFile() % QStringLiteral("\n\n");
+        prompt += QStringLiteral("You are working in the file: ") + view->document()->url().toLocalFile() + QStringLiteral("\n\n");
         prompt += QStringLiteral("Here is the full content of the file for context:\n```\n");
         prompt += view->document()->text();
         prompt += QStringLiteral("\n```\n\n");
@@ -173,9 +234,9 @@ QString ContextManager::buildRefactorPrompt(const QString &instruction, const QS
         KDevelop::DUChainUtils::ItemUnderCursor item = KDevelop::DUChainUtils::itemUnderCursor(view->document()->url(), view->selectionRange().start());
         if (item.declaration) {
             prompt += QStringLiteral("The selected code corresponds to the following semantic AST entity:\n");
-            prompt += QStringLiteral("- Declaration: ") % item.declaration->toString() % QChar('\n');
+            prompt += QStringLiteral("- Declaration: ") + item.declaration->toString() + QStringLiteral("\n");
             if (item.declaration->abstractType()) {
-                prompt += QStringLiteral("- Type: ") % item.declaration->abstractType()->toString() % QChar('\n');
+                prompt += QStringLiteral("- Type: ") + item.declaration->abstractType()->toString() + QStringLiteral("\n");
             }
             prompt += QStringLiteral("\n");
         }
@@ -185,7 +246,7 @@ QString ContextManager::buildRefactorPrompt(const QString &instruction, const QS
     prompt += code;
     prompt += QStringLiteral("\n```\n\n");
     
-    prompt += QStringLiteral("Instruction: ") % instruction % QStringLiteral("\n\n");
+    prompt += QStringLiteral("Instruction: ") + instruction + QStringLiteral("\n\n");
     prompt += QStringLiteral("Please output ONLY the resulting modified code block to replace the selection. Do not include any conversational text or markdown wrappers in your output. Only raw code.");
     
     return prompt;
