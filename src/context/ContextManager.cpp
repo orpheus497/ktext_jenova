@@ -4,6 +4,8 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QTextStream>
+#include <QDateTime>
+#include <QReadWriteLock>
 #include <interfaces/icore.h>
 #include <interfaces/iprojectcontroller.h>
 #include <interfaces/iproject.h>
@@ -59,14 +61,39 @@ QString ContextManager::getAgentsInstruction(const QString &projectRoot) const
         QStringLiteral(".agents/AGENTS.md")
     };
 
+    struct AgentCache {
+        QReadWriteLock lock;
+        QHash<QString, QString> content;
+        QHash<QString, QDateTime> lastModified;
+    };
+    static AgentCache cache;
+
     // ##Loop purpose: Check all possible locations for the AGENTS.md file.
     for (const auto &candidate : candidates) {
-        QFile file(QDir(projectRoot).filePath(candidate));
+        QString filePath = QDir(projectRoot).filePath(candidate);
+        QFileInfo info(filePath);
+        QDateTime lastMod = info.lastModified();
         
-        // ##Condition purpose: Only read the file if we can successfully open it.
-        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            QTextStream in(&file);
-            return in.readAll();
+        if (lastMod.isValid()) {
+            {
+                QReadLocker locker(&cache.lock);
+                if (cache.lastModified.value(filePath) == lastMod) {
+                    return cache.content.value(filePath);
+                }
+            }
+
+            QFile file(filePath);
+
+            // ##Condition purpose: Only read the file if we can successfully open it.
+            if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                QTextStream in(&file);
+                QString content = in.readAll();
+
+                QWriteLocker locker(&cache.lock);
+                cache.lastModified[filePath] = lastMod;
+                cache.content[filePath] = content;
+                return content;
+            }
         }
     }
     return QString();
