@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QTextStream>
+#include <QDateTime>
 #include <interfaces/icore.h>
 #include <interfaces/iprojectcontroller.h>
 #include <interfaces/iproject.h>
@@ -56,12 +57,31 @@ QString ContextManager::getAgentsInstruction(const QString &projectRoot) const
 
     // ##Loop purpose: Check all possible locations for the AGENTS.md file.
     for (const auto &candidate : candidates) {
-        QFile file(QDir(projectRoot).filePath(candidate));
+        QString filePath = QDir(projectRoot).filePath(candidate);
+        QFileInfo fileInfo(filePath);
         
-        // ##Condition purpose: Only read the file if we can successfully open it.
-        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            QTextStream in(&file);
-            return in.readAll();
+        if (fileInfo.exists()) {
+            QDateTime lastModified = fileInfo.lastModified();
+
+            // Check cache first
+            auto it = m_agentsCache.constFind(filePath);
+            if (it != m_agentsCache.constEnd() && it.value().lastModified == lastModified) {
+                return it.value().content;
+            }
+
+            QFile file(filePath);
+            // ##Condition purpose: Only read the file if we can successfully open it.
+            if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                QTextStream in(&file);
+                QString content = in.readAll();
+
+                AgentsCacheEntry newEntry;
+                newEntry.lastModified = lastModified;
+                newEntry.content = content;
+                m_agentsCache.insert(filePath, newEntry);
+
+                return content;
+            }
         }
     }
     return QString();
@@ -91,7 +111,32 @@ QString ContextManager::buildSystemPrompt(KTextEditor::View *view) const
         
         prompt += QStringLiteral("\nCurrent file: ") + view->document()->url().toLocalFile() + QStringLiteral("\n");
         prompt += QStringLiteral("\n--- File Content ---\n```\n");
-        prompt += view->document()->text();
+
+        const int maxFileLength = 50000;
+        KTextEditor::Document *doc = view->document();
+        int totalLength = 0;
+        int linesCount = doc->lines();
+        int targetLine = 0;
+        int targetColumn = 0;
+        bool truncated = false;
+
+        for (int i = 0; i < linesCount; ++i) {
+            int len = doc->lineLength(i);
+            if (totalLength + len + 1 > maxFileLength) {
+                targetLine = i;
+                targetColumn = maxFileLength - totalLength;
+                truncated = true;
+                break;
+            }
+            totalLength += len + 1;
+        }
+
+        if (truncated) {
+            prompt += doc->text(KTextEditor::Range(0, 0, targetLine, targetColumn)) + QStringLiteral("\n...[Content truncated due to size]...\n");
+        } else {
+            prompt += doc->text();
+        }
+
         prompt += QStringLiteral("\n```\n");
         
         if (view->selection()) {
@@ -130,7 +175,32 @@ QString ContextManager::buildRefactorPrompt(const QString &instruction, const QS
         
         prompt += QStringLiteral("You are working in the file: ") + view->document()->url().toLocalFile() + QStringLiteral("\n\n");
         prompt += QStringLiteral("Here is the full content of the file for context:\n```\n");
-        prompt += view->document()->text();
+
+        const int maxFileLength = 50000;
+        KTextEditor::Document *doc = view->document();
+        int totalLength = 0;
+        int linesCount = doc->lines();
+        int targetLine = 0;
+        int targetColumn = 0;
+        bool truncated = false;
+
+        for (int i = 0; i < linesCount; ++i) {
+            int len = doc->lineLength(i);
+            if (totalLength + len + 1 > maxFileLength) {
+                targetLine = i;
+                targetColumn = maxFileLength - totalLength;
+                truncated = true;
+                break;
+            }
+            totalLength += len + 1;
+        }
+
+        if (truncated) {
+            prompt += doc->text(KTextEditor::Range(0, 0, targetLine, targetColumn)) + QStringLiteral("\n...[Content truncated due to size]...\n");
+        } else {
+            prompt += doc->text();
+        }
+
         prompt += QStringLiteral("\n```\n\n");
         
         KDevelop::DUChainReadLocker lock(KDevelop::DUChain::lock());
