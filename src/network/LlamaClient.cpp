@@ -122,6 +122,8 @@ void LlamaClient::onCompletionReadyRead()
     // ##Condition purpose: Ensure reply is valid.
     if (!reply) return;
 
+    QString batchContent;
+
     // ##Loop purpose: Read all available SSE lines.
     while (reply->canReadLine()) {
         QByteArray line = reply->readLine().trimmed();
@@ -133,9 +135,13 @@ void LlamaClient::onCompletionReadyRead()
 
             QJsonDocument doc = QJsonDocument::fromJson(jsonData);
             if (doc.isObject()) {
-                m_completionBuffer += doc.object()[QStringLiteral("content")].toString();
+                batchContent += doc.object()[QStringLiteral("content")].toString();
             }
         }
+    }
+
+    if (!batchContent.isEmpty()) {
+        m_completionBuffer += batchContent;
     }
 }
 
