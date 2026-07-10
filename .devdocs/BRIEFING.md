@@ -1,11 +1,11 @@
 # Project Briefing
 
-**Timestamp**: 2026-07-10 00:47
+**Timestamp**: 2026-07-10 11:09
 
 ## Status
-- **Current Phase**: Phase 21 (Consolidation & Merge).
-- **Step**: Consolidating PR 14 branch into main, resolving merge conflicts, and updating installation process to proper KDE plugin paths.
-- **Progress**: 100% - Successfully merged PR 14, resolved all conflicts, fixed build/tests, and updated installation instructions.
+- **Current Phase**: Phase 22 (PR 22 Issues & Conflict Resolution).
+- **Step**: Fix security journal (append instead of replace), implement `scrollToAnchor()` for QTextBrowser link handling, and resolve merge conflicts in `tests/TestAiChatWidget.cpp`.
+- **Progress**: 0% - Starting PR 22 tasks.
 
 ## Previous Session Accomplishments
 - Implemented deep KDevelop integrations: DUChain AST extraction, `IProject` aware contexts.
@@ -13,14 +13,15 @@
 - Hooked code completion injection natively into `IDocumentController` to support all KDevelop views.
 - Fully rebranded the plugin from "Jenova AI / Jenova K Text" to **JCA KDev Plugin** featuring the **Jenova C.A.** UI persona.
 - Updated the main `README.md` to reflect all architectural changes and deployment steps.
+- Merged PR 14, resolved all conflicts, fixed build/tests, and updated installation instructions.
 
 ## Current Blockers
-- Pending user approval to proceed with the PR 14 merge and conflict resolution.
+- None.
 
 ## Recent Architectural Decisions
-- Decided to stop using `.local` as a hotfix for KDevelop plugin installation; moving to standard KDE plugin paths requiring `sudo make install`.
+- Security journal must remain an append-only log to preserve historical context (e.g. URL scheme validation context).
 
 ## Next Execution Steps
-1. Merge PR 14 branch `jules-14714858885759819008-c1fa69dc` into `main`.
-2. Resolve merge conflicts in `src/context/ContextManager.cpp`, `src/ui/AiChatInputWidget.h`, and tests.
-3. Update `README.md` to specify standard installation (removing `.local` prefix).
+1. Locate and append the new vulnerability entry to the Security Journal instead of replacing the existing one. (2-3 mins)
+2. Locate the link handling logic for QTextBrowser (likely in `AiChatWidget.cpp`) and add support for relative URLs with fragments using `scrollToAnchor()`. (3-5 mins)
+3. Resolve merge conflicts in `tests/TestAiChatWidget.cpp`. (3-5 mins)

@@ -31,3 +31,9 @@ add_executable(TestLlamaClient TestLlamaClient.cpp)
 target_include_directories(TestLlamaClient PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/mocks ../src)
 target_link_libraries(TestLlamaClient LlamaClientObj Qt6::Test)
 add_test(NAME TestLlamaClient COMMAND TestLlamaClient)
+
+# TestAiChatWidget
+add_executable(TestAiChatWidget TestAiChatWidget.cpp ../src/ui/AiChatWidget.cpp ../src/ui/AiChatInputWidget.cpp ../src/network/LlamaClient.cpp ../src/context/ContextManager.cpp)
+target_include_directories(TestAiChatWidget PRIVATE ../src)
+target_link_libraries(TestAiChatWidget PRIVATE Qt6::Test Qt6::Widgets Qt6::Core KF6::TextEditor KDev::Interfaces KDev::Project KDev::Language KF6::I18n)
+add_test(NAME TestAiChatWidget COMMAND TestAiChatWidget)
