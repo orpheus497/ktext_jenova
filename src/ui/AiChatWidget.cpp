@@ -13,6 +13,7 @@
 #include <KTextEditor/Document>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QTextDocument>
 
 #include <interfaces/icore.h>
 #include <interfaces/idocumentcontroller.h>
@@ -134,7 +135,9 @@ void AiChatWidget::onWarning(const QString &warning)
 // ##Method purpose: Refreshes the display with Qt6's native Markdown parser.
 void AiChatWidget::renderMarkdown()
 {
-    m_chatHistory->setMarkdown(m_rawMarkdown);
+    QTextDocument::MarkdownFeatures features = QTextDocument::MarkdownDialectGitHub;
+    features |= QTextDocument::MarkdownNoHTML;
+    m_chatHistory->document()->setMarkdown(m_rawMarkdown, features);
     m_chatHistory->moveCursor(QTextCursor::End);
 }
 

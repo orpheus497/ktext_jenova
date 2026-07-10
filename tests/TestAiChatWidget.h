@@ -23,4 +23,7 @@ private:
 
     // ##Method purpose: Tests subsequent messages append to history and update system prompt if needed.
     static bool testSendMessageSubsequentMessage();
+
+    // ##Method purpose: Tests that markdown rendering does not allow unsanitized HTML execution.
+    static bool testMarkdownSecurity();
 };

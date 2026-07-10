@@ -1,11 +1,11 @@
 # Project Briefing
 
-**Timestamp**: 2026-07-10 10:20
+**Timestamp**: 2026-07-10 11:09
 
 ## Status
-- **Current Phase**: Phase 22 (Code Review & Issue Resolution).
-- **Step**: Addressing PR review issues related to duplicate truncation logic, missing comments, view registration duplication, markdown rendering frequency, translation usage, and unit test compilation.
-- **Progress**: 0% - Starting verification of review findings.
+- **Current Phase**: Phase 22 (PR 22 Issues & Conflict Resolution).
+- **Step**: Fix security journal (append instead of replace), implement `scrollToAnchor()` for QTextBrowser link handling, and resolve merge conflicts in `tests/TestAiChatWidget.cpp`.
+- **Progress**: 0% - Starting PR 22 tasks.
 
 ## Previous Session Accomplishments
 - Implemented deep KDevelop integrations: DUChain AST extraction, `IProject` aware contexts.
@@ -13,21 +13,19 @@
 - Hooked code completion injection natively into `IDocumentController` to support all KDevelop views.
 - Fully rebranded the plugin from "Jenova AI / Jenova K Text" to **JCA KDev Plugin** featuring the **Jenova C.A.** UI persona.
 - Updated the main `README.md` to reflect all architectural changes and deployment steps.
-- Merged PR 14, resolved conflicts, fixed build/tests, and updated installation instructions.
+- Merged PR 14, resolved all conflicts, fixed build/tests, and updated installation instructions.
 
 ## Current Blockers
-- Awaiting user verification that the ToolView can be successfully opened from the `Window -> Tool Views` menu and that Autocomplete now works in standard documents.
+- None.
 
 ## Recent Architectural Decisions
+- Security journal must remain an append-only log to preserve historical context (e.g. URL scheme validation context).
 - Removed early `CreateAndRaise` calls on the ToolView to prevent KDevelop startup failures.
 - Renamed project branding globally across CMake, JSON Metadata, and C++ UI strings.
 - Testing requires mock objects for KDevelop framework components.
 - Decided to stop using `.local` as a hothotfix for KDevelop plugin installation; moving to standard KDE plugin paths requiring `sudo make install`.
 
 ## Next Execution Steps
-1. Refactor truncation logic and fix QStringBuilder inclusion in `ContextManager.cpp`.
-2. Add missing purpose comments and consolidate view registration in `KDevLLMPlugin.cpp`.
-3. Optimize markdown rendering frequency in `AiChatInputWidget.cpp` / `LlamaClient.cpp`.
-4. Fix localization of placeholder text and busy state UX in `AiChatInputWidget.cpp`.
-5. Fix file completion boundary check in `AiChatInputWidget.cpp`.
-6. Add pure virtual method stubs and class purpose comment for `NullDocView` in `TestAiCompletionModel.cpp`.
+1. Locate and append the new vulnerability entry to the Security Journal instead of replacing the existing one. (2-3 mins)
+2. Locate the link handling logic for QTextBrowser (likely in `AiChatWidget.cpp`) and add support for relative URLs with fragments using `scrollToAnchor()`. (3-5 mins)
+3. Resolve merge conflicts in `tests/TestAiChatWidget.cpp`. (3-5 mins)

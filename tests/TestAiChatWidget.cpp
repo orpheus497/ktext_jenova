@@ -4,6 +4,8 @@
 #include "../src/ui/AiChatInputWidget.h"
 #include <QJsonObject>
 #include <QApplication>
+#include <QTextBrowser>
+#include <QTextDocument>
 #include <iostream>
 
 TestAiChatWidget::TestAiChatWidget(QObject *parent) : QObject(parent) {}
@@ -35,6 +37,13 @@ int TestAiChatWidget::runTests() {
         std::cout << "testSendMessageSubsequentMessage PASSED\n";
     }
 
+    std::cout << "Running testMarkdownSecurity...\n";
+    if (!testMarkdownSecurity()) {
+        std::cerr << "testMarkdownSecurity FAILED\n";
+        failed++;
+    } else {
+        std::cout << "testMarkdownSecurity PASSED\n";
+    }
     if (failed == 0) {
         std::cout << "All tests passed!\n";
     } else {
@@ -136,6 +145,37 @@ bool TestAiChatWidget::testSendMessageSubsequentMessage() {
     return true;
 }
 
+bool TestAiChatWidget::testMarkdownSecurity() {
+    QTextBrowser browser;
+    QString markdown = QStringLiteral("Here is some HTML: <b>bold</b> <script>alert(1)</script>");
+
+    QTextDocument::MarkdownFeatures features = QTextDocument::MarkdownDialectGitHub;
+    features |= QTextDocument::MarkdownNoHTML;
+
+    browser.document()->setMarkdown(markdown, features);
+
+    QString html = browser.toHtml();
+
+    if (html.contains(QStringLiteral("<script>"))) {
+        std::cerr << "Test failed: HTML script tag was not escaped!" << std::endl;
+        std::cerr << html.toStdString() << std::endl;
+        return false;
+    }
+
+    if (html.contains(QStringLiteral("<b>"))) {
+        std::cerr << "Test failed: HTML b tag was not escaped!" << std::endl;
+        std::cerr << html.toStdString() << std::endl;
+        return false;
+    }
+
+    if (html.contains(QStringLiteral("&lt;script&gt;")) && html.contains(QStringLiteral("&lt;b&gt;"))) {
+        return true;
+    } else {
+        std::cerr << "Test failed: Did not find escaped HTML output." << std::endl;
+        std::cerr << html.toStdString() << std::endl;
+        return false;
+    }
+}
 // ##Function purpose: Application entry point for running the standalone test suite.
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
