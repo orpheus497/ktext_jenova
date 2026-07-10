@@ -101,9 +101,10 @@ QString ContextManager::getAgentsInstruction(const QString &projectRoot) const
     for (const auto &candidate : candidates) {
         QString filePath = rootDir.filePath(candidate);
         QFileInfo fi(filePath);
-        if (!fi.exists()) continue;
 
         QString canonFile = fi.canonicalFilePath();
+        if (canonFile.isEmpty()) continue; // File does not exist
+
         // ##Condition purpose: Prevent path traversal via symlinks.
         if (!canonFile.startsWith(canonRoot)) continue;
 
