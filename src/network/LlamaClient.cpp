@@ -167,6 +167,8 @@ void LlamaClient::onChatReadyRead()
     // ##Condition purpose: Ensure reply is valid.
     if (!reply) return;
 
+    QString batchContent;
+
     // ##Loop purpose: Read all available SSE lines.
     while (reply->canReadLine()) {
         QByteArray line = reply->readLine().trimmed();
@@ -183,11 +185,15 @@ void LlamaClient::onChatReadyRead()
                     QJsonObject delta = choices.first().toObject()[QStringLiteral("delta")].toObject();
                     QString content = delta[QStringLiteral("content")].toString();
                     if (!content.isEmpty()) {
-                        Q_EMIT chatTokenReceived(content);
+                        batchContent += content;
                     }
                 }
             }
         }
+    }
+
+    if (!batchContent.isEmpty()) {
+        Q_EMIT chatTokenReceived(batchContent);
     }
 }
 
