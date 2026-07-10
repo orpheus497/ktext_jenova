@@ -44,6 +44,7 @@ AiChatWidget::AiChatWidget(QWidget *parent)
     connect(m_client, &LlamaClient::chatTokenReceived, this, &AiChatWidget::onChatTokenReceived);
     connect(m_client, &LlamaClient::chatResponseFinished, this, &AiChatWidget::onChatFinished);
     connect(m_client, &LlamaClient::errorOccurred, this, &AiChatWidget::onError);
+    connect(m_client, &LlamaClient::warningOccurred, this, &AiChatWidget::onWarning);
     
     // Display welcome guide
     clearChat();
@@ -65,7 +66,8 @@ void AiChatWidget::sendMessage(const QString &text)
     
     // ##Condition purpose: Inject or update the system prompt on every message to keep file context fresh.
     KTextEditor::View* activeView = nullptr;
-    auto activeDoc = KDevelop::ICore::self()->documentController()->activeDocument();
+    auto core = KDevelop::ICore::self();
+    auto activeDoc = core ? core->documentController()->activeDocument() : nullptr;
     if (activeDoc) {
         activeView = activeDoc->activeTextView();
     }
@@ -120,6 +122,13 @@ void AiChatWidget::onError(const QString &error)
 {
     m_inputWidget->setPromptRunning(false);
     m_rawMarkdown += QStringLiteral("\n\n**Error:** `") + error + QStringLiteral("`\n\n---\n\n");
+    renderMarkdown();
+}
+
+// ##Method purpose: Displays a security warning in the chat log.
+void AiChatWidget::onWarning(const QString &warning)
+{
+    m_rawMarkdown += QStringLiteral("\n\n**Security Warning:** ") + warning + QStringLiteral("\n\n---\n\n");
     renderMarkdown();
 }
 

@@ -20,6 +20,10 @@
 
 ## Recent Architectural Decisions
 - Security journal must remain an append-only log to preserve historical context (e.g. URL scheme validation context).
+- Removed early `CreateAndRaise` calls on the ToolView to prevent KDevelop startup failures.
+- Renamed project branding globally across CMake, JSON Metadata, and C++ UI strings.
+- Testing requires mock objects for KDevelop framework components.
+- Decided to stop using `.local` as a hothotfix for KDevelop plugin installation; moving to standard KDE plugin paths requiring `sudo make install`.
 
 ## Next Execution Steps
 1. Locate and append the new vulnerability entry to the Security Journal instead of replacing the existing one. (2-3 mins)

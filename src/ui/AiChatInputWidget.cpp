@@ -134,6 +134,8 @@ CommandTextEdit::CompletionContext CommandTextEdit::completionUnderCursor() cons
                 context.filterText = context.prefix.length() > 1 ? context.prefix.mid(1) : QString();
                 context.prefixStart = searchPos;
                 return context;
+            } else {
+                break;
             }
         }
         if (ch.isSpace()) break;
@@ -154,7 +156,7 @@ AiChatInputWidget::AiChatInputWidget(QWidget *parent)
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
     m_textEdit = new CommandTextEdit(this);
-    m_textEdit->setPlaceholderText(QStringLiteral("Type a message... (@ for files)"));
+    m_textEdit->setPlaceholderText(i18n("Type a message... (@ for files)"));
     m_textEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
     m_textEdit->installEventFilter(this);
 

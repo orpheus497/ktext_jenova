@@ -1,3 +1,4 @@
+// ##Script function and purpose: Implements tests for the AiChatWidget class.
 #include "TestAiChatWidget.h"
 #include "../src/ui/AiChatWidget.h"
 #include "../src/ui/AiChatInputWidget.h"
@@ -43,7 +44,6 @@ int TestAiChatWidget::runTests() {
     } else {
         std::cout << "testMarkdownSecurity PASSED\n";
     }
-
     if (failed == 0) {
         std::cout << "All tests passed!\n";
     } else {
@@ -176,7 +176,6 @@ bool TestAiChatWidget::testMarkdownSecurity() {
         return false;
     }
 }
-
 // ##Function purpose: Application entry point for running the standalone test suite.
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
