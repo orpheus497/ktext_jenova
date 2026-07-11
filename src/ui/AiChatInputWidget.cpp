@@ -172,7 +172,7 @@ AiChatInputWidget::AiChatInputWidget(QWidget *parent)
     m_sendButton = new QPushButton(QStringLiteral("Send"), this);
     m_sendButton->setToolTip(i18n("Send message (Enter)"));
     m_sendButton->setCursor(Qt::PointingHandCursor);
-    m_stopButton = new QPushButton(QStringLiteral("Stop"), this);
+    m_stopButton = new QPushButton(i18n("Stop"), this);
     m_stopButton->setToolTip(i18n("Stop generating response"));
     m_stopButton->setCursor(Qt::PointingHandCursor);
     m_stopButton->setVisible(false); // Hidden by default

@@ -96,8 +96,6 @@ void LlamaClient::stopChat()
 {
     if (m_chatReply) {
         m_chatReply->abort();
-        m_chatReply->deleteLater();
-        m_chatReply = nullptr;
         Q_EMIT chatResponseFinished();
     }
 }

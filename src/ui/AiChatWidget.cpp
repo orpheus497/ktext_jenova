@@ -152,18 +152,17 @@ void AiChatWidget::clearChat()
 {
     // Save history before clearing, if we have active user/assistant messages.
     if (m_messageHistory.size() > 1) { // > 1 to ignore empty chats with only the system prompt
-        QString dataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QStringLiteral("/chat_history");
+        const QString dataPath = QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)).filePath(QStringLiteral("chat_history"));
         QDir dir(dataPath);
-        if (!dir.exists()) {
-            dir.mkpath(QStringLiteral("."));
-        }
-        QString timestamp = QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd_HH-mm-ss"));
-        QString filename = dir.filePath(QStringLiteral("chat_") + timestamp + QStringLiteral(".json"));
-        QFile file(filename);
-        if (file.open(QIODevice::WriteOnly)) {
-            QJsonDocument doc(m_messageHistory);
-            file.write(doc.toJson());
-            file.close();
+        if (dir.mkpath(dataPath)) {
+            const QString timestamp = QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd_HH-mm-ss"));
+            const QString filename = dir.filePath(QStringLiteral("chat_") + timestamp + QStringLiteral(".json"));
+            QFile file(filename);
+            if (file.open(QIODevice::WriteOnly)) {
+                const QJsonDocument doc(m_messageHistory);
+                file.write(doc.toJson());
+                file.close();
+            }
         }
     }
 
