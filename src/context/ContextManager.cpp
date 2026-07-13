@@ -26,8 +26,8 @@ static QString getSemanticASTString(KTextEditor::View *view, const QString &head
     if (item.declaration) {
         QString result = header % QStringLiteral("\n") %
                          QStringLiteral("- Declaration: ") % item.declaration->toString() % QStringLiteral("\n");
-        if (item.declaration->abstractType()) {
-            result += QStringLiteral("- Type: ") % item.declaration->abstractType()->toString() % QStringLiteral("\n");
+        if (auto type = item.declaration->abstractType()) {
+            result += QStringLiteral("- Type: ") % type->toString() % QStringLiteral("\n");
         }
         return result;
     }
