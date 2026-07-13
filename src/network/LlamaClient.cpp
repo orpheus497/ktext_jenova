@@ -91,6 +91,15 @@ void LlamaClient::requestChat(const QJsonArray &messages)
     connect(m_chatReply, &QNetworkReply::finished, this, &LlamaClient::onChatFinished);
 }
 
+// ##Method purpose: Aborts any ongoing chat request.
+void LlamaClient::stopChat()
+{
+    if (m_chatReply) {
+        m_chatReply->abort();
+        Q_EMIT chatResponseFinished();
+    }
+}
+
 // ##Method purpose: Prepares and sends an HTTP POST request for refactoring.
 void LlamaClient::requestRefactor(const QString &promptText)
 {
