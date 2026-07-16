@@ -1,6 +1,7 @@
 // ##Script function and purpose: Implements the asynchronous streaming network client to interface with Llama.cpp endpoints.
 #include "LlamaClient.h"
 #include <QNetworkRequest>
+#include <QStringBuilder>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QUrl>
@@ -47,7 +48,7 @@ void LlamaClient::checkInsecureEndpoint(const QString &scheme, const QString &ho
 // ##Method purpose: Prepares and sends an HTTP POST request to the /completion endpoint.
 void LlamaClient::requestCompletion(const QString &prefix, const QString &suffix)
 {
-    QUrl url(m_endpointUrl + QStringLiteral("/completion"));
+    QUrl url(m_endpointUrl % QStringLiteral("/completion"));
     checkInsecureEndpoint(url.scheme(), url.host());
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, QByteArray("application/json"));
@@ -72,7 +73,7 @@ void LlamaClient::requestCompletion(const QString &prefix, const QString &suffix
 // ##Method purpose: Prepares and sends an HTTP POST request to the /chat/completions endpoint.
 void LlamaClient::requestChat(const QJsonArray &messages)
 {
-    QUrl url(m_endpointUrl + QStringLiteral("/chat/completions"));
+    QUrl url(m_endpointUrl % QStringLiteral("/chat/completions"));
     checkInsecureEndpoint(url.scheme(), url.host());
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, QByteArray("application/json"));
@@ -103,7 +104,7 @@ void LlamaClient::stopChat()
 // ##Method purpose: Prepares and sends an HTTP POST request for refactoring.
 void LlamaClient::requestRefactor(const QString &promptText)
 {
-    QUrl url(m_endpointUrl + QStringLiteral("/completion"));
+    QUrl url(m_endpointUrl % QStringLiteral("/completion"));
     checkInsecureEndpoint(url.scheme(), url.host());
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, QByteArray("application/json"));

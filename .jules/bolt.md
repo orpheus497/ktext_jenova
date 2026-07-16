@@ -1,7 +1,4 @@
-## 2024-07-10 - Initial Setup
-**Learning:** Just starting
-**Action:** Will read and update
+## 2026-07-15 - Optimize string concatenation using QStringBuilder
 
-## 2024-10-27 - Batching SSE Stream Tokens
-**Learning:** When processing Server-Sent Events (SSE) over Qt network loops (e.g., `QNetworkReply::readyRead`), emitting tokens line by line can cause O(N^2) markdown re-rendering slowdowns during fast network bursts. Batch incoming stream tokens into a buffer before emitting them to the UI thread.
-**Action:** Always accumulate text chunks within `canReadLine()` loops and emit them once per network event.
+**Learning:** Qt provides a `QStringBuilder` template class via `#include <QStringBuilder>` that allows using the `%` operator to combine string fragments without allocating temporary variables at each concatenation step. In heavily executed formatting functions, `prompt.reserve(...)` combined with `%` avoids O(n^2) or heavy allocation patterns during large document construction.
+**Action:** When appending strings multiple times in loops or across large blocks, pre-allocate space via `.reserve()` and use the `%` operator to reduce memory copying and allocation overhead.

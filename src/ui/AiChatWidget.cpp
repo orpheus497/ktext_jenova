@@ -18,6 +18,7 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QJsonDocument>
+#include <QStringBuilder>
 #include <QDateTime>
 
 #include <interfaces/icore.h>
@@ -67,7 +68,7 @@ void AiChatWidget::sendMessage(const QString &text)
 {
     if (text.isEmpty()) return;
     
-    m_rawMarkdown += QStringLiteral("**You:**\n\n") + text + QStringLiteral("\n\n---\n\n**AI:**\n\n");
+    m_rawMarkdown += QStringLiteral("**You:**\n\n") % text % QStringLiteral("\n\n---\n\n**AI:**\n\n");
     renderMarkdown();
     
     // ##Condition purpose: Inject or update the system prompt on every message to keep file context fresh.
@@ -127,14 +128,14 @@ void AiChatWidget::onChatFinished()
 void AiChatWidget::onError(const QString &error)
 {
     m_inputWidget->setPromptRunning(false);
-    m_rawMarkdown += QStringLiteral("\n\n**Error:** `") + error + QStringLiteral("`\n\n---\n\n");
+    m_rawMarkdown += QStringLiteral("\n\n**Error:** `") % error % QStringLiteral("`\n\n---\n\n");
     renderMarkdown();
 }
 
 // ##Method purpose: Displays a security warning in the chat log.
 void AiChatWidget::onWarning(const QString &warning)
 {
-    m_rawMarkdown += QStringLiteral("\n\n**Security Warning:** ") + warning + QStringLiteral("\n\n---\n\n");
+    m_rawMarkdown += QStringLiteral("\n\n**Security Warning:** ") % warning % QStringLiteral("\n\n---\n\n");
     renderMarkdown();
 }
 
@@ -156,7 +157,7 @@ void AiChatWidget::clearChat()
         QDir dir(dataPath);
         if (dir.mkpath(dataPath)) {
             const QString timestamp = QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd_HH-mm-ss"));
-            const QString filename = dir.filePath(QStringLiteral("chat_") + timestamp + QStringLiteral(".json"));
+            const QString filename = dir.filePath(QStringLiteral("chat_") % timestamp % QStringLiteral(".json"));
             QFile file(filename);
             if (file.open(QIODevice::WriteOnly)) {
                 const QJsonDocument doc(m_messageHistory);
