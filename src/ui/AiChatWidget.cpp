@@ -1,4 +1,4 @@
-// ##Script function and purpose: Implements the native chat UI with QListView, SQLite history, and @file context injection.
+// ##Script function and purpose: Implements the native chat UI with QListView, SQLite history, @file context, and conversation management.
 #include "AiChatWidget.h"
 #include "AiChatInputWidget.h"
 #include "ChatMessageModel.h"
@@ -18,10 +18,15 @@
 #include <QJsonObject>
 #include <QRegularExpression>
 #include <QTimer>
+#include <QDir>
+#include <QFileInfo>
 
 #include <interfaces/icore.h>
 #include <interfaces/idocumentcontroller.h>
 #include <interfaces/idocument.h>
+#include <interfaces/iprojectcontroller.h>
+#include <interfaces/iproject.h>
+#include <util/path.h>
 
 // ##Method purpose: Sets up the native list-based layout, initializes components, and connects signals.
 AiChatWidget::AiChatWidget(QWidget *parent)
@@ -49,6 +54,12 @@ AiChatWidget::AiChatWidget(QWidget *parent)
     newChatBtn->setToolTip(QStringLiteral("Start a new conversation"));
     newChatBtn->setFlat(true);
     toolbar->addWidget(newChatBtn);
+
+    m_deleteBtn = new QPushButton(QIcon::fromTheme(QStringLiteral("edit-delete")), QString(), this);
+    m_deleteBtn->setToolTip(QStringLiteral("Delete the selected conversation"));
+    m_deleteBtn->setFlat(true);
+    m_deleteBtn->setEnabled(false);
+    toolbar->addWidget(m_deleteBtn);
 
     layout->addLayout(toolbar);
 
@@ -79,7 +90,14 @@ AiChatWidget::AiChatWidget(QWidget *parent)
     connect(m_inputWidget, &AiChatInputWidget::stopClicked, m_client, &LlamaClient::stopChat);
     connect(m_inputWidget, &AiChatInputWidget::newChatClicked, this, &AiChatWidget::clearChat);
     connect(newChatBtn, &QPushButton::clicked, this, &AiChatWidget::clearChat);
+    connect(m_deleteBtn, &QPushButton::clicked, this, &AiChatWidget::deleteCurrentConversation);
     connect(m_conversationSelector, QOverload<int>::of(&QComboBox::activated), this, &AiChatWidget::loadConversation);
+
+    // ##Step purpose: Enable/disable delete button based on combo selection.
+    connect(m_conversationSelector, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int idx) {
+        qint64 convId = m_conversationSelector->itemData(idx).toLongLong();
+        m_deleteBtn->setEnabled(convId > 0);
+    });
     
     // ##Step purpose: Connect network signals.
     connect(m_client, &LlamaClient::chatTokenReceived, this, &AiChatWidget::onChatTokenReceived);
@@ -89,7 +107,6 @@ AiChatWidget::AiChatWidget(QWidget *parent)
 
     // ##Step purpose: Ensure the view auto-scrolls when model content changes.
     connect(m_messageModel, &QAbstractItemModel::rowsInserted, this, [this]() {
-        // ##Step purpose: Defer scroll to after the layout has updated.
         QTimer::singleShot(0, this, &AiChatWidget::scrollToBottom);
     });
     connect(m_messageModel, &QAbstractItemModel::dataChanged, this, [this]() {
@@ -99,6 +116,54 @@ AiChatWidget::AiChatWidget(QWidget *parent)
     // ##Step purpose: Start with a fresh conversation.
     refreshConversationList();
     clearChat();
+}
+
+// ##Method purpose: Resolves a relative file path against the current project root.
+QString AiChatWidget::resolveFilePath(const QString &relativePath) const
+{
+    // ##Condition purpose: If the path is already absolute and exists, use it directly.
+    if (QFileInfo(relativePath).isAbsolute()) {
+        if (QFileInfo::exists(relativePath)) {
+            return relativePath;
+        }
+        return QString();
+    }
+
+    // ##Step purpose: Find the project root to resolve relative paths.
+    auto *core = KDevelop::ICore::self();
+    if (!core || !core->projectController()) return QString();
+
+    QString projectRoot;
+    auto projects = core->projectController()->projects();
+    // ##Loop purpose: Try each open project to find one that contains the referenced file.
+    for (auto *project : projects) {
+        QString root = project->path().toLocalFile();
+        QString candidate = QDir(root).filePath(relativePath);
+        if (QFileInfo::exists(candidate)) {
+            return candidate;
+        }
+        // ##Step purpose: Remember the first project root as a fallback.
+        if (projectRoot.isEmpty()) {
+            projectRoot = root;
+        }
+    }
+
+    // ##Step purpose: Try to resolve against the active document's directory.
+    auto activeDoc = core->documentController()->activeDocument();
+    if (activeDoc && activeDoc->textDocument()) {
+        QString docDir = QFileInfo(activeDoc->textDocument()->url().toLocalFile()).absolutePath();
+        QString candidate = QDir(docDir).filePath(relativePath);
+        if (QFileInfo::exists(candidate)) {
+            return candidate;
+        }
+    }
+
+    // ##Step purpose: Last resort — try the first project root even if the file doesn't exist.
+    if (!projectRoot.isEmpty()) {
+        return QDir(projectRoot).filePath(relativePath);
+    }
+
+    return QString();
 }
 
 // ##Method purpose: Extracts @file references and resolves them to context using DUChain.
@@ -111,10 +176,15 @@ QString AiChatWidget::resolveFileReferences(const QString &text) const
     // ##Loop purpose: Find all @file references in the user message.
     while (it.hasNext()) {
         auto match = it.next();
-        QString filePath = match.captured(1);
-        QString fileContext = m_context->extractRelevantFileContext(filePath);
+        QString rawPath = match.captured(1);
+
+        // ##Step purpose: Resolve the path against the project root before extracting context.
+        QString resolvedPath = resolveFilePath(rawPath);
+        if (resolvedPath.isEmpty()) continue;
+
+        QString fileContext = m_context->extractRelevantFileContext(resolvedPath);
         if (!fileContext.isEmpty()) {
-            contextBlock += QStringLiteral("\n\n--- Referenced File Context ---\n") + fileContext;
+            contextBlock += QStringLiteral("\n\n--- Referenced File Context (@") + rawPath + QStringLiteral(") ---\n") + fileContext;
         }
     }
     return contextBlock;
@@ -127,7 +197,6 @@ void AiChatWidget::sendMessage(const QString &text)
 
     // ##Step purpose: Create a new conversation in SQLite if this is the first message.
     if (m_currentConversationId < 0) {
-        // ##Step purpose: Use the first 40 chars of the user message as the conversation title.
         QString title = text.left(40);
         if (text.length() > 40) title += QStringLiteral("...");
         m_currentConversationId = m_database->createConversation(title);
@@ -141,7 +210,7 @@ void AiChatWidget::sendMessage(const QString &text)
     // ##Step purpose: Show a "thinking" indicator so the user knows the system is waiting for the LLM.
     m_messageModel->addMessage(QStringLiteral("thinking"), QStringLiteral("Waiting for response..."));
 
-    // ##Step purpose: Inject or update the system prompt on every message to keep file context fresh.
+    // ##Step purpose: Build the system prompt with fresh file context.
     KTextEditor::View* activeView = nullptr;
     auto core = KDevelop::ICore::self();
     auto activeDoc = core ? core->documentController()->activeDocument() : nullptr;
@@ -156,16 +225,26 @@ void AiChatWidget::sendMessage(const QString &text)
         sysPrompt += fileContext;
     }
 
+    // ##Step purpose: Ensure the system prompt is always at index 0 of the message history.
+    // This handles both fresh conversations and loaded conversations that may lack a system entry.
+    QJsonObject sysMsg;
+    sysMsg[QStringLiteral("role")] = QStringLiteral("system");
+    sysMsg[QStringLiteral("content")] = sysPrompt;
+
     if (m_messageHistory.isEmpty()) {
-        QJsonObject sysMsg;
-        sysMsg[QStringLiteral("role")] = QStringLiteral("system");
-        sysMsg[QStringLiteral("content")] = sysPrompt;
         m_messageHistory.append(sysMsg);
     } else {
-        QJsonObject sysMsg = m_messageHistory.first().toObject();
-        if (sysMsg[QStringLiteral("role")].toString() == QStringLiteral("system")) {
-            sysMsg[QStringLiteral("content")] = sysPrompt;
+        QJsonObject first = m_messageHistory.first().toObject();
+        if (first[QStringLiteral("role")].toString() == QStringLiteral("system")) {
             m_messageHistory.replace(0, sysMsg);
+        } else {
+            // ##Step purpose: Insert system prompt at position 0 if the loaded history didn't have one.
+            QJsonArray updated;
+            updated.append(sysMsg);
+            for (int i = 0; i < m_messageHistory.size(); ++i) {
+                updated.append(m_messageHistory.at(i));
+            }
+            m_messageHistory = updated;
         }
     }
     
@@ -180,7 +259,6 @@ void AiChatWidget::sendMessage(const QString &text)
 }
 
 // ##Method purpose: Receives streaming tokens and updates the native list model incrementally.
-// The first token automatically replaces the "thinking" placeholder.
 void AiChatWidget::onChatTokenReceived(const QString &token)
 {
     m_currentAssistantResponse += token;
@@ -193,19 +271,16 @@ void AiChatWidget::onChatFinished()
     m_inputWidget->setPromptRunning(false);
     m_messageModel->finaliseLastAssistant();
     
-    // ##Condition purpose: Only persist and track non-empty responses.
     if (!m_currentAssistantResponse.isEmpty()) {
         QJsonObject assistantMsg;
         assistantMsg[QStringLiteral("role")] = QStringLiteral("assistant");
         assistantMsg[QStringLiteral("content")] = m_currentAssistantResponse;
         m_messageHistory.append(assistantMsg);
 
-        // ##Step purpose: Persist the assistant's response to SQLite.
         if (m_currentConversationId >= 0) {
             m_database->addMessage(m_currentConversationId, QStringLiteral("assistant"), m_currentAssistantResponse);
         }
     } else {
-        // ##Step purpose: If no tokens were received, remove the thinking indicator.
         m_messageModel->removeThinkingIndicator();
     }
 
@@ -216,7 +291,6 @@ void AiChatWidget::onChatFinished()
 void AiChatWidget::onError(const QString &error)
 {
     m_inputWidget->setPromptRunning(false);
-    // ##Step purpose: Remove the thinking indicator before showing the error.
     m_messageModel->removeThinkingIndicator();
     m_messageModel->addMessage(QStringLiteral("error"), error);
 
@@ -231,7 +305,7 @@ void AiChatWidget::onWarning(const QString &warning)
     m_messageModel->addMessage(QStringLiteral("warning"), warning);
 }
 
-// ##Method purpose: Starts a new conversation, preserving the current one in SQLite.
+// ##Method purpose: Starts a new conversation.
 void AiChatWidget::clearChat()
 {
     m_messageHistory = QJsonArray();
@@ -239,7 +313,6 @@ void AiChatWidget::clearChat()
     m_currentConversationId = -1;
     m_messageModel->clear();
 
-    // ##Step purpose: Show the welcome message as a system-role entry.
     m_messageModel->addMessage(QStringLiteral("welcome"),
         QStringLiteral("Welcome to KDev LLM, your AI Assistant for KDevelop!\n\n"
                        "• Chat: Type below and press Enter to ask questions about your code.\n"
@@ -249,7 +322,6 @@ void AiChatWidget::clearChat()
                        "Ensure your LLM server is running at the configured endpoint (Settings → KDev LLM)."));
 
     refreshConversationList();
-    // ##Step purpose: Reset the combo box to the first item (placeholder) for a new chat.
     m_conversationSelector->setCurrentIndex(0);
 }
 
@@ -257,7 +329,6 @@ void AiChatWidget::clearChat()
 void AiChatWidget::loadConversation(int comboIndex)
 {
     qint64 convId = m_conversationSelector->itemData(comboIndex).toLongLong();
-    // ##Condition purpose: Ignore the placeholder "— Conversation History —" entry.
     if (convId <= 0) return;
 
     m_currentConversationId = convId;
@@ -265,28 +336,25 @@ void AiChatWidget::loadConversation(int comboIndex)
     m_currentAssistantResponse.clear();
     m_messageModel->clear();
 
-    // ##Step purpose: Reload messages from SQLite and repopulate the model and JSON history.
     auto messages = m_database->getMessages(convId);
     // ##Loop purpose: Rebuild the visual model and the JSON history from database records.
     for (const auto &msg : messages) {
-        // ##Condition purpose: Skip system messages from display but keep them in JSON history.
-        if (msg.role == QStringLiteral("system")) {
-            QJsonObject sysMsg;
-            sysMsg[QStringLiteral("role")] = msg.role;
-            sysMsg[QStringLiteral("content")] = msg.content;
-            m_messageHistory.append(sysMsg);
-            continue;
-        }
-
-        // ##Condition purpose: Skip non-displayable roles like "thinking".
-        if (msg.role == QStringLiteral("thinking")) {
+        // ##Condition purpose: Skip system and thinking messages from display.
+        if (msg.role == QStringLiteral("system") || msg.role == QStringLiteral("thinking")) {
+            // ##Condition purpose: Keep system messages in JSON history for continuity.
+            if (msg.role == QStringLiteral("system")) {
+                QJsonObject sysMsg;
+                sysMsg[QStringLiteral("role")] = msg.role;
+                sysMsg[QStringLiteral("content")] = msg.content;
+                m_messageHistory.append(sysMsg);
+            }
             continue;
         }
 
         m_messageModel->addMessage(msg.role, msg.content);
 
-        // ##Condition purpose: Only add user/assistant messages to the JSON history sent to the LLM.
-        if (msg.role != QStringLiteral("error") && msg.role != QStringLiteral("warning")) {
+        // ##Condition purpose: Only user/assistant messages go to the LLM JSON history.
+        if (msg.role == QStringLiteral("user") || msg.role == QStringLiteral("assistant")) {
             QJsonObject jsonMsg;
             jsonMsg[QStringLiteral("role")] = msg.role;
             jsonMsg[QStringLiteral("content")] = msg.content;
@@ -294,8 +362,25 @@ void AiChatWidget::loadConversation(int comboIndex)
         }
     }
 
-    // ##Step purpose: Keep the combo box highlighting the currently loaded conversation.
     m_conversationSelector->setCurrentIndex(comboIndex);
+}
+
+// ##Method purpose: Deletes the conversation selected in the combo box from SQLite.
+void AiChatWidget::deleteCurrentConversation()
+{
+    int idx = m_conversationSelector->currentIndex();
+    qint64 convId = m_conversationSelector->itemData(idx).toLongLong();
+    // ##Condition purpose: Ignore the placeholder entry.
+    if (convId <= 0) return;
+
+    m_database->deleteConversation(convId);
+
+    // ##Condition purpose: If the deleted conversation is the currently active one, reset to a new chat.
+    if (convId == m_currentConversationId) {
+        clearChat();
+    } else {
+        refreshConversationList();
+    }
 }
 
 // ##Method purpose: Scrolls the QListView to show the most recent message.
@@ -310,7 +395,6 @@ void AiChatWidget::scrollToBottom()
 // ##Method purpose: Refreshes the conversation combo box from the SQLite database.
 void AiChatWidget::refreshConversationList()
 {
-    // ##Step purpose: Remember the current selection to preserve it after repopulating.
     qint64 currentId = m_currentConversationId;
     int selectIndex = 0;
 
@@ -319,8 +403,7 @@ void AiChatWidget::refreshConversationList()
     m_conversationSelector->addItem(QStringLiteral("— Conversation History —"), QVariant(static_cast<qint64>(0)));
 
     auto conversations = m_database->getConversations();
-    int idx = 1; // start at 1 because index 0 is the placeholder
-    // ##Loop purpose: Add each conversation to the selector with its title and ID.
+    int idx = 1;
     for (const auto &conv : conversations) {
         QString label = conv.title;
         if (label.isEmpty()) {
@@ -331,14 +414,16 @@ void AiChatWidget::refreshConversationList()
         }
         m_conversationSelector->addItem(label, QVariant(conv.id));
 
-        // ##Condition purpose: Track which index matches the currently active conversation.
         if (conv.id == currentId) {
             selectIndex = idx;
         }
         ++idx;
     }
 
-    // ##Step purpose: Restore the selection to the currently active conversation.
     m_conversationSelector->setCurrentIndex(selectIndex);
     m_conversationSelector->blockSignals(false);
+
+    // ##Step purpose: Update delete button state after refresh.
+    qint64 selectedId = m_conversationSelector->currentData().toLongLong();
+    m_deleteBtn->setEnabled(selectedId > 0);
 }

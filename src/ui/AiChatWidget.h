@@ -7,6 +7,7 @@
 
 class QListView;
 class QComboBox;
+class QPushButton;
 class AiChatInputWidget;
 class LlamaClient;
 class ContextManager;
@@ -47,6 +48,9 @@ private Q_SLOTS:
     // ##Method purpose: Loads a previous conversation from the history selector.
     void loadConversation(int comboIndex);
 
+    // ##Method purpose: Deletes the currently selected conversation from SQLite.
+    void deleteCurrentConversation();
+
 private:
     // ##Method purpose: Scrolls the list view to the bottom to show the latest message.
     void scrollToBottom();
@@ -57,6 +61,9 @@ private:
     // ##Method purpose: Extracts @file references from user text and builds context string.
     QString resolveFileReferences(const QString &text) const;
 
+    // ##Method purpose: Resolves a relative file path against the project root.
+    QString resolveFilePath(const QString &relativePath) const;
+
     LlamaClient *m_client;
     ContextManager *m_context;
     ChatDatabase *m_database;
@@ -65,6 +72,7 @@ private:
 
     QListView *m_chatView;
     QComboBox *m_conversationSelector;
+    QPushButton *m_deleteBtn;
     AiChatInputWidget *m_inputWidget;
 
     qint64 m_currentConversationId = -1;

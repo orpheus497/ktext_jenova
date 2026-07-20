@@ -3,6 +3,8 @@
 
 #include <QStyledItemDelegate>
 
+class QTextDocument;
+
 // ##Class purpose: Paints chat message bubbles using the native QPalette and QStyle, matching KDevelop's look and feel.
 class ChatMessageDelegate : public QStyledItemDelegate {
     Q_OBJECT
@@ -17,6 +19,13 @@ public:
     QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
 private:
+    // ##Method purpose: Computes the text layout width from the viewport width. Shared by paint() and sizeHint().
+    int textLayoutWidth(int viewportWidth) const;
+
+    // ##Method purpose: Creates a QTextDocument with the correct content, font, and wrapping width. Caller takes ownership.
+    QTextDocument* createDoc(const QString &content, const QString &role,
+                              const QFont &font, int layoutWidth) const;
+
     static constexpr int kBubblePadding = 10;
     static constexpr int kBubbleMargin = 6;
     static constexpr int kBubbleRadius = 8;

@@ -6,6 +6,7 @@
 #include <QTextDocument>
 #include <QAbstractTextDocumentLayout>
 #include <QApplication>
+#include <QListView>
 
 // ##Method purpose: Constructor.
 ChatMessageDelegate::ChatMessageDelegate(QObject *parent)
@@ -13,33 +14,55 @@ ChatMessageDelegate::ChatMessageDelegate(QObject *parent)
 {
 }
 
+// ##Method purpose: Computes the text layout width from the overall available width.
+// Extracted to a shared helper so paint() and sizeHint() always agree on dimensions.
+int ChatMessageDelegate::textLayoutWidth(int viewportWidth) const
+{
+    const int maxBubbleWidth = (viewportWidth - 2 * kBubbleMargin) * kMaxBubbleWidthPercent / 100;
+    return qMax(100, maxBubbleWidth - 2 * kBubblePadding);
+}
+
+// ##Method purpose: Creates and configures a QTextDocument with the proper content and wrapping width.
+QTextDocument* ChatMessageDelegate::createDoc(const QString &content, const QString &role,
+                                               const QFont &font, int layoutWidth) const
+{
+    auto *doc = new QTextDocument();
+    doc->setDefaultFont(font);
+    doc->setTextWidth(layoutWidth);
+    doc->setDocumentMargin(0);
+
+    // ##Condition purpose: Use markdown for assistant content, plain text for everything else.
+    if (role == QStringLiteral("assistant")) {
+        doc->setMarkdown(content, QTextDocument::MarkdownDialectGitHub);
+    } else {
+        doc->setPlainText(content);
+    }
+    // ##Step purpose: Force layout so size() is accurate immediately.
+    doc->documentLayout();
+    doc->adjustSize();
+    return doc;
+}
+
 // ##Method purpose: Paints a message bubble with role-specific colours drawn from the native palette.
 void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
+    // ##Step purpose: Clip to the item rectangle to prevent any overflow into adjacent items.
+    painter->setClipRect(option.rect);
 
     const QString role = index.data(ChatMessageModel::RoleRole).toString();
     const QString content = index.data(ChatMessageModel::ContentRole).toString();
     const bool isStreaming = index.data(ChatMessageModel::IsStreamingRole).toBool();
 
     const QPalette &pal = option.palette;
-    const int availWidth = option.rect.width() - 2 * kBubbleMargin;
-    const int maxBubbleWidth = availWidth * kMaxBubbleWidthPercent / 100;
+    const int viewportWidth = option.rect.width();
+    const int layoutW = textLayoutWidth(viewportWidth);
 
-    // ##Step purpose: Configure a QTextDocument for word-wrapped text rendering with markdown support.
-    QTextDocument doc;
-    doc.setDefaultFont(option.font);
-    doc.setTextWidth(maxBubbleWidth - 2 * kBubblePadding);
-
-    // ##Condition purpose: Use markdown rendering for assistant content, plain text for user messages.
-    if (role == QStringLiteral("assistant")) {
-        doc.setMarkdown(content, QTextDocument::MarkdownDialectGitHub);
-    } else {
-        doc.setPlainText(content);
-    }
-
-    const QSizeF docSize = doc.size();
+    // ##Step purpose: Build the text document with the shared helper.
+    QTextDocument *doc = createDoc(content, role, option.font, layoutW);
+    const QSizeF docSize = doc->size();
+    const int maxBubbleWidth = (viewportWidth - 2 * kBubbleMargin) * kMaxBubbleWidthPercent / 100;
     const int bubbleWidth = qMin(maxBubbleWidth, static_cast<int>(docSize.width()) + 2 * kBubblePadding);
     const int bubbleHeight = static_cast<int>(docSize.height()) + 2 * kBubblePadding;
 
@@ -47,7 +70,7 @@ void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
     QColor bubbleColor;
     int bubbleX;
 
-    // ##Condition purpose: Style each role differently — user on the right, assistant on the left, system centred.
+    // ##Condition purpose: Style each role differently — user on the right, assistant on the left.
     if (role == QStringLiteral("user")) {
         bubbleColor = pal.color(QPalette::Active, QPalette::Highlight);
         bubbleX = option.rect.right() - kBubbleMargin - bubbleWidth;
@@ -55,22 +78,18 @@ void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
         bubbleColor = pal.color(QPalette::Active, QPalette::AlternateBase);
         bubbleX = option.rect.left() + kBubbleMargin;
     } else if (role == QStringLiteral("error")) {
-        // ##Step purpose: Errors use a desaturated red tint.
         QColor base = pal.color(QPalette::Active, QPalette::Window);
         bubbleColor = QColor::fromHsl(0, 80, qBound(40, base.lightness(), 200));
         bubbleX = option.rect.left() + kBubbleMargin;
     } else if (role == QStringLiteral("warning")) {
-        // ##Step purpose: Warnings use a desaturated amber tint.
         QColor base = pal.color(QPalette::Active, QPalette::Window);
         bubbleColor = QColor::fromHsl(40, 80, qBound(40, base.lightness(), 200));
         bubbleX = option.rect.left() + kBubbleMargin;
     } else if (role == QStringLiteral("thinking")) {
-        // ##Step purpose: Thinking indicator uses a subtle highlight tint to show active waiting.
         QColor highlight = pal.color(QPalette::Active, QPalette::Highlight);
         bubbleColor = QColor::fromHsl(highlight.hslHue(), 40, qBound(60, pal.color(QPalette::Active, QPalette::Window).lightness() + 15, 220));
         bubbleX = option.rect.left() + kBubbleMargin;
     } else {
-        // system, welcome, etc. — subtle background
         bubbleColor = pal.color(QPalette::Active, QPalette::Window);
         bubbleX = option.rect.left() + kBubbleMargin;
     }
@@ -83,7 +102,7 @@ void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
     painter->setBrush(bubbleColor);
     painter->drawRoundedRect(bubbleRect, kBubbleRadius, kBubbleRadius);
 
-    // ##Step purpose: Draw a subtle streaming indicator (pulsing dot) when the assistant is still generating.
+    // ##Step purpose: Draw a streaming indicator dot when the assistant is still generating.
     if (isStreaming) {
         painter->setBrush(pal.color(QPalette::Active, QPalette::Highlight));
         const int dotSize = 6;
@@ -94,7 +113,6 @@ void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
     }
 
     // ##Step purpose: Render the text content inside the bubble.
-    // Choose text colour based on background luminance for readability.
     QColor textColor;
     if (role == QStringLiteral("user")) {
         textColor = pal.color(QPalette::Active, QPalette::HighlightedText);
@@ -103,12 +121,14 @@ void ChatMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
     }
 
     painter->translate(bubbleRect.left() + kBubblePadding, bubbleRect.top() + kBubblePadding);
+    // ##Step purpose: Clip text drawing to the bubble interior to prevent overflow.
+    painter->setClipRect(QRectF(0, 0, bubbleWidth - 2 * kBubblePadding, bubbleHeight - 2 * kBubblePadding));
 
-    // ##Step purpose: Apply the text colour to the document before painting.
     QAbstractTextDocumentLayout::PaintContext ctx;
     ctx.palette.setColor(QPalette::Text, textColor);
-    doc.documentLayout()->draw(painter, ctx);
+    doc->documentLayout()->draw(painter, ctx);
 
+    delete doc;
     painter->restore();
 }
 
@@ -118,19 +138,25 @@ QSize ChatMessageDelegate::sizeHint(const QStyleOptionViewItem &option, const QM
     const QString content = index.data(ChatMessageModel::ContentRole).toString();
     const QString role = index.data(ChatMessageModel::RoleRole).toString();
 
-    const int availWidth = option.rect.width() > 0 ? option.rect.width() : 400;
-    const int maxBubbleWidth = (availWidth - 2 * kBubbleMargin) * kMaxBubbleWidthPercent / 100;
-
-    QTextDocument doc;
-    doc.setDefaultFont(option.font);
-    doc.setTextWidth(maxBubbleWidth - 2 * kBubblePadding);
-
-    if (role == QStringLiteral("assistant")) {
-        doc.setMarkdown(content, QTextDocument::MarkdownDialectGitHub);
-    } else {
-        doc.setPlainText(content);
+    // ##Step purpose: Use the viewport width from the parent QListView for accurate first-render sizing.
+    int viewportWidth = option.rect.width();
+    if (viewportWidth <= 0) {
+        auto *view = qobject_cast<const QListView *>(option.widget);
+        if (view && view->viewport()) {
+            viewportWidth = view->viewport()->width();
+        }
+    }
+    // ##Condition purpose: Final fallback if viewport width is still unavailable.
+    if (viewportWidth <= 0) {
+        viewportWidth = 400;
     }
 
-    const int height = static_cast<int>(doc.size().height()) + 2 * kBubblePadding + 2 * kBubbleMargin;
-    return QSize(availWidth, height);
+    const int layoutW = textLayoutWidth(viewportWidth);
+
+    // ##Step purpose: Create the document with the exact same parameters as paint().
+    QTextDocument *doc = createDoc(content, role, option.font, layoutW);
+    const int height = static_cast<int>(doc->size().height()) + 2 * kBubblePadding + 2 * kBubbleMargin;
+    delete doc;
+
+    return QSize(viewportWidth, height);
 }
