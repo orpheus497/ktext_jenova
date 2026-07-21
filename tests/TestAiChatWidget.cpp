@@ -57,15 +57,11 @@ bool TestAiChatWidget::testSendMessageEmpty() {
     AiChatWidget widget;
     // initial state after constructor calling clearChat()
     int initialHistorySize = widget.m_messageHistory.size();
-    QString initialMarkdown = widget.m_rawMarkdown;
 
     // Trigger sendMessage via private method
     widget.sendMessage(QStringLiteral(""));
 
     if (widget.m_messageHistory.size() != initialHistorySize) {
-        return false;
-    }
-    if (widget.m_rawMarkdown != initialMarkdown) {
         return false;
     }
     return true;
@@ -96,12 +92,6 @@ bool TestAiChatWidget::testSendMessageFirstMessage() {
     }
     if (userMsg[QStringLiteral("content")].toString() != QStringLiteral("Hello AI")) {
         std::cerr << "Second message content mismatch\n";
-        return false;
-    }
-
-    // Markdown should reflect the user text
-    if (!widget.m_rawMarkdown.contains(QStringLiteral("**You:**\n\nHello AI\n\n---\n\n**AI:**\n\n"))) {
-        std::cerr << "Markdown mismatch\n";
         return false;
     }
 

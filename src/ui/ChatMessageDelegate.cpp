@@ -31,6 +31,10 @@ QTextDocument* ChatMessageDelegate::createDoc(const QString &content, const QStr
     doc->setTextWidth(layoutWidth);
     doc->setDocumentMargin(0);
 
+    QTextOption opt = doc->defaultTextOption();
+    opt.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+    doc->setDefaultTextOption(opt);
+
     // ##Condition purpose: Use markdown for assistant content, plain text for everything else.
     if (role == QStringLiteral("assistant")) {
         doc->setMarkdown(content, QTextDocument::MarkdownDialectGitHub);

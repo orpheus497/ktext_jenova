@@ -17,6 +17,7 @@
 #include <QScrollBar>
 #include <QJsonObject>
 #include <QRegularExpression>
+#include <QSet>
 #include <QTimer>
 #include <QDir>
 #include <QFileInfo>
@@ -50,14 +51,12 @@ AiChatWidget::AiChatWidget(QWidget *parent)
     m_conversationSelector->setToolTip(QStringLiteral("Select a previous conversation"));
     toolbar->addWidget(m_conversationSelector);
 
-    auto *newChatBtn = new QPushButton(QIcon::fromTheme(QStringLiteral("document-new")), QString(), this);
+    auto *newChatBtn = new QPushButton(QIcon::fromTheme(QStringLiteral("document-new")), QStringLiteral("New"), this);
     newChatBtn->setToolTip(QStringLiteral("Start a new conversation"));
-    newChatBtn->setFlat(true);
     toolbar->addWidget(newChatBtn);
 
-    m_deleteBtn = new QPushButton(QIcon::fromTheme(QStringLiteral("edit-delete")), QString(), this);
+    m_deleteBtn = new QPushButton(QIcon::fromTheme(QStringLiteral("edit-delete")), QStringLiteral("Delete"), this);
     m_deleteBtn->setToolTip(QStringLiteral("Delete the selected conversation"));
-    m_deleteBtn->setFlat(true);
     m_deleteBtn->setEnabled(false);
     toolbar->addWidget(m_deleteBtn);
 
@@ -171,6 +170,7 @@ QString AiChatWidget::resolveFileReferences(const QString &text) const
 {
     static const QRegularExpression fileRefRe(QStringLiteral("@(\\S+)"));
     QString contextBlock;
+    QSet<QString> processedPaths;
 
     auto it = fileRefRe.globalMatch(text);
     // ##Loop purpose: Find all @file references in the user message.
@@ -180,7 +180,8 @@ QString AiChatWidget::resolveFileReferences(const QString &text) const
 
         // ##Step purpose: Resolve the path against the project root before extracting context.
         QString resolvedPath = resolveFilePath(rawPath);
-        if (resolvedPath.isEmpty()) continue;
+        if (resolvedPath.isEmpty() || processedPaths.contains(resolvedPath)) continue;
+        processedPaths.insert(resolvedPath);
 
         QString fileContext = m_context->extractRelevantFileContext(resolvedPath);
         if (!fileContext.isEmpty()) {
@@ -219,8 +220,15 @@ void AiChatWidget::sendMessage(const QString &text)
     }
     QString sysPrompt = m_context->buildSystemPrompt(activeView);
 
-    // ##Step purpose: Resolve any @file references and append their context to the system prompt.
-    QString fileContext = resolveFileReferences(text);
+    // ##Step purpose: Resolve any @file references from the entire conversation and append their context to the system prompt.
+    QString allTextForRefs = text;
+    for (const auto &msg : m_messageHistory) {
+        QJsonObject obj = msg.toObject();
+        if (obj[QStringLiteral("role")].toString() == QStringLiteral("user")) {
+            allTextForRefs += QStringLiteral(" ") + obj[QStringLiteral("content")].toString();
+        }
+    }
+    QString fileContext = resolveFileReferences(allTextForRefs);
     if (!fileContext.isEmpty()) {
         sysPrompt += fileContext;
     }
