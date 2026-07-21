@@ -67,6 +67,7 @@ static QString getTruncatedDocumentText(KTextEditor::Document *doc, int maxLengt
 
 // ##Method purpose: Constructor implementation.
 ContextManager::ContextManager(QObject *parent) : QObject(parent) {
+    // ##Action purpose: Limit cache to 100 entries to prevent unbounded memory growth.
     m_projectRootCache.setMaxCost(100);
 }
 
@@ -94,19 +95,31 @@ QString ContextManager::getProjectRoot(KTextEditor::Document *doc) const
         return proj->path().toLocalFile();
     }
     
+    // ##Action purpose: Extract the local file path to start root traversal.
     QString filePath = doc->url().toLocalFile();
+    // ##Action purpose: Check if path is empty (e.g., non-local URLs) to prevent root mis-caching.
     if (filePath.isEmpty()) {
         return QString();
     }
+    // ##Action purpose: Check cache before expensive traversal.
     if (QString* cachedRoot = m_projectRootCache.object(filePath)) {
-        return *cachedRoot;
+        // ##Action purpose: Invalidate cache if standard marker missing.
+        QDir rootDir(*cachedRoot);
+        if (!cachedRoot->isEmpty() && !rootDir.exists(QStringLiteral(".git")) && !rootDir.exists(QStringLiteral("CMakeLists.txt"))) {
+            m_projectRootCache.remove(filePath);
+        } else {
+            return *cachedRoot;
+        }
     }
 
     // Fallback to directory scanning if not in a KDevelop project
+    // ##Action purpose: Begin scanning upwards from the document's directory.
     QDir dir = QFileInfo(filePath).absoluteDir();
     while (true) {
+        // ##Action purpose: Identify standard project root markers.
         if (dir.exists(QStringLiteral(".git")) || dir.exists(QStringLiteral("CMakeLists.txt"))) {
             QString rootPath = dir.absolutePath();
+            // ##Action purpose: Cache discovered project root.
             m_projectRootCache.insert(filePath, new QString(rootPath));
             return rootPath;
         }
@@ -115,6 +128,7 @@ QString ContextManager::getProjectRoot(KTextEditor::Document *doc) const
         }
     }
 
+    // ##Action purpose: Cache empty string if no project root found.
     m_projectRootCache.insert(filePath, new QString());
     return QString();
 }
