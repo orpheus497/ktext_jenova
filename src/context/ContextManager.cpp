@@ -303,7 +303,7 @@ QStringList ContextManager::getProjectFiles() const
         if (dotIndex != -1) {
             const QStringView suffix = QStringView(path).mid(dotIndex + 1);
             if (allowedExtensions.contains(suffix)) {
-                files.append(path);
+                files.append(std::move(path));
             }
         }
     }
