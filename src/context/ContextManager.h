@@ -46,6 +46,7 @@ public:
     QStringList getProjectFiles() const;
 
 private Q_SLOTS:
+    // ##Method purpose: Removes the specified file from the cache when it is modified.
     void onAgentsFileChanged(const QString &path);
 
 private:
