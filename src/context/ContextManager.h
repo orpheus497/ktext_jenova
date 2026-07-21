@@ -1,6 +1,5 @@
 // ##Script function and purpose: Manages the collection of context data (AGENTS.md, selection) for the LLM.
 #pragma once
-
 #include <QObject>
 #include <QString>
 #include <QUrl>
