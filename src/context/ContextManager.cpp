@@ -167,6 +167,7 @@ QString ContextManager::getAgentsInstruction(const QString &projectRoot) const
             // ##Action purpose: Register the file path to be monitored.
             m_fileWatcher->addPath(canonFile);
 
+            // ##Condition purpose: Cache the content only when the canonical file is successfully tracked by the watcher to guarantee its invalidation path.
             if (m_fileWatcher->files().contains(canonFile)) {
                 // ##Action purpose: Cache the content now that an invalidation path is guaranteed.
                 m_agentsCache.insert(canonFile, content);
