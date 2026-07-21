@@ -102,38 +102,48 @@ QString ContextManager::getProjectRoot(KTextEditor::Document *doc) const
         return QString();
     }
     // ##Action purpose: Check cache before expensive traversal.
+    // ##Condition purpose: Extract the cached root, track its limit, and differentiate negative entries.
+    QString targetLimit;
+    bool hasCache = false;
     if (QString* cachedRoot = m_projectRootCache.object(filePath)) {
-        // ##Action purpose: Invalidate cache if standard marker missing or if negative entry needs rescan.
-        if (cachedRoot->isEmpty()) {
-            m_projectRootCache.remove(filePath);
-        } else {
-            QDir rootDir(*cachedRoot);
-            if (!rootDir.exists(QStringLiteral(".git")) && !rootDir.exists(QStringLiteral("CMakeLists.txt"))) {
-                m_projectRootCache.remove(filePath);
-            } else {
-                return *cachedRoot;
-            }
-        }
+        hasCache = true;
+        targetLimit = cachedRoot->isEmpty() ? QStringLiteral("//__EMPTY__") : *cachedRoot;
     }
 
     // Fallback to directory scanning if not in a KDevelop project
     // ##Action purpose: Begin scanning upwards from the document's directory.
     QDir dir = QFileInfo(filePath).absoluteDir();
+    // ##Loop purpose: Traverse upwards checking for root markers until we hit the root or an established cached state.
     while (true) {
-        // ##Action purpose: Identify standard project root markers.
+        // ##Condition purpose: Identify standard project root markers and cache/return if found.
         if (dir.exists(QStringLiteral(".git")) || dir.exists(QStringLiteral("CMakeLists.txt"))) {
             QString rootPath = dir.absolutePath();
-            // ##Action purpose: Cache discovered project root.
             m_projectRootCache.insert(filePath, new QString(rootPath));
             return rootPath;
         }
+
+        // ##Condition purpose: Evaluate if we've reached a previous cache evaluation boundary without a hit.
+        if (hasCache) {
+            if (targetLimit == QStringLiteral("//__EMPTY__")) {
+                if (dir.isRoot()) {
+                    return QString();
+                }
+            } else if (dir.absolutePath() == targetLimit) {
+                // ##Action purpose: Invalidate the cache by letting it scan past the old invalid limit.
+                hasCache = false;
+            }
+        }
+
+        // ##Condition purpose: Break if we reach the absolute filesystem root or fail to traverse upwards.
         if (dir.isRoot() || !dir.cdUp()) {
             break;
         }
     }
 
-    // ##Action purpose: Cache empty string if no project root found.
-    m_projectRootCache.insert(filePath, new QString());
+    // ##Condition purpose: Cache empty string if no project root found and we aren't duplicating a negative cache hit.
+    if (!hasCache || targetLimit != QStringLiteral("//__EMPTY__")) {
+        m_projectRootCache.insert(filePath, new QString());
+    }
     return QString();
 }
 
