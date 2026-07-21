@@ -45,7 +45,9 @@ int TestAiChatWidget::runTests() {
         std::cout << "testMarkdownSecurity PASSED\n";
     }
 
+    // ##Action purpose: Execute the file context aggregation tests.
     std::cout << "Running testFileContextAggregation...\n";
+    // ##Condition purpose: Report failure if the file context aggregation test fails.
     if (!testFileContextAggregation()) {
         std::cerr << "testFileContextAggregation FAILED\n";
         failed++;
@@ -176,10 +178,11 @@ bool TestAiChatWidget::testMarkdownSecurity() {
     }
 }
 
+// ##Method purpose: Tests that file references from previous messages are retained in the system prompt without duplicates.
 bool TestAiChatWidget::testFileContextAggregation() {
     AiChatWidget widget;
 
-    // First message references a file
+    // ##Action purpose: Send the first message with a file reference.
     widget.sendMessage(QStringLiteral("Review @src/main.cpp"));
 
     // Setup some dummy state to mimic a loaded conversation
@@ -188,7 +191,7 @@ bool TestAiChatWidget::testFileContextAggregation() {
     firstUserMsg[QStringLiteral("content")] = QStringLiteral("Review @src/main.cpp");
     widget.m_messageHistory.append(firstUserMsg);
 
-    // Second message references another file
+    // ##Action purpose: Send the second message with a different file reference.
     widget.sendMessage(QStringLiteral("Now check @src/utils.cpp"));
 
     // And append to history
@@ -197,16 +200,17 @@ bool TestAiChatWidget::testFileContextAggregation() {
     secondUserMsg[QStringLiteral("content")] = QStringLiteral("Now check @src/utils.cpp");
     widget.m_messageHistory.append(secondUserMsg);
 
-    // Third message references the first file again
+    // ##Action purpose: Send the third message repeating the first file reference.
     widget.sendMessage(QStringLiteral("Let's look at @src/main.cpp again"));
 
-    // Extract the system prompt to verify all contexts exist exactly once
+    // ##Condition purpose: Extract the system prompt to verify all contexts exist exactly once.
     if (widget.m_messageHistory.isEmpty()) {
         std::cerr << "Message history is empty!\n";
         return false;
     }
 
     QJsonObject sysMsg = widget.m_messageHistory.first().toObject();
+    // ##Condition purpose: Ensure the first message in the history is a system prompt.
     if (sysMsg[QStringLiteral("role")].toString() != QStringLiteral("system")) {
         std::cerr << "First message is not system prompt!\n";
         return false;
@@ -214,7 +218,7 @@ bool TestAiChatWidget::testFileContextAggregation() {
 
     QString content = sysMsg[QStringLiteral("content")].toString();
 
-    // Both files should be in the context block
+    // ##Condition purpose: Both files should be in the context block.
     if (!content.contains(QStringLiteral("--- Referenced File Context (@src/main.cpp) ---"))) {
         std::cerr << "Missing context for src/main.cpp\n";
         return false;
@@ -225,12 +229,21 @@ bool TestAiChatWidget::testFileContextAggregation() {
         return false;
     }
 
-    // Check for duplicates
+    // ##Condition purpose: Check for duplicates for src/main.cpp.
     int firstOccurrence = content.indexOf(QStringLiteral("--- Referenced File Context (@src/main.cpp) ---"));
     int lastOccurrence = content.lastIndexOf(QStringLiteral("--- Referenced File Context (@src/main.cpp) ---"));
 
     if (firstOccurrence != lastOccurrence) {
         std::cerr << "Duplicate context found for src/main.cpp\n";
+        return false;
+    }
+
+    // ##Condition purpose: Check for duplicates for src/utils.cpp.
+    int firstOccurrenceUtils = content.indexOf(QStringLiteral("--- Referenced File Context (@src/utils.cpp) ---"));
+    int lastOccurrenceUtils = content.lastIndexOf(QStringLiteral("--- Referenced File Context (@src/utils.cpp) ---"));
+
+    if (firstOccurrenceUtils != lastOccurrenceUtils) {
+        std::cerr << "Duplicate context found for src/utils.cpp\n";
         return false;
     }
 
