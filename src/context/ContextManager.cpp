@@ -137,8 +137,9 @@ QString ContextManager::getAgentsInstruction(const QString &projectRoot) const
         // ##Condition purpose: Prevent path traversal via symlinks.
         if (!canonFile.startsWith(canonRoot)) continue;
 
-        if (m_agentsCache.contains(canonFile)) {
-            return m_agentsCache.value(canonFile);
+        auto it = m_agentsCache.constFind(canonFile);
+        if (it != m_agentsCache.constEnd()) {
+            return *it;
         }
 
         QFile file(canonFile);
@@ -155,9 +156,7 @@ QString ContextManager::getAgentsInstruction(const QString &projectRoot) const
                 connect(m_fileWatcher, &QFileSystemWatcher::fileChanged,
                         this, &ContextManager::onAgentsFileChanged);
             }
-            if (!m_fileWatcher->files().contains(canonFile)) {
-                m_fileWatcher->addPath(canonFile);
-            }
+            m_fileWatcher->addPath(canonFile);
 
             return content;
         }
