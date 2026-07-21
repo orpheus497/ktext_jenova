@@ -16,6 +16,8 @@
 #include <project/projectmodel.h>
 #include <util/path.h>
 #include <QStringBuilder>
+#include <QSet>
+#include <QStringView>
 
 // ##Method purpose: Helper to extract semantic context from KDevelop DUChain AST
 static QString getSemanticASTString(KTextEditor::View *view, const QString &header)
@@ -286,19 +288,23 @@ QStringList ContextManager::getProjectFiles() const
 
     // ##Step purpose: Recursively collect all file items from the project model.
     const auto allFiles = project->fileSet();
+
+    // ⚡ Bolt: Use a QSet of QStringView for O(1) extension lookups instead of chained O(N) string comparisons.
+    // This provides a measurable speedup during large project traversals by avoiding repeated `endsWith` calls.
+    static const QSet<QStringView> allowedExtensions = {
+        u"cpp", u"h", u"c", u"hpp", u"py", u"js", u"ts", u"java",
+        u"rs", u"go", u"cmake", u"txt", u"md", u"json", u"xml", u"yaml", u"yml"
+    };
+
     for (const auto &indexedString : allFiles) {
         QString path = indexedString.str();
         // ##Condition purpose: Only include source-like files, not build artifacts.
-        if (path.endsWith(QStringLiteral(".cpp")) || path.endsWith(QStringLiteral(".h")) ||
-            path.endsWith(QStringLiteral(".c")) || path.endsWith(QStringLiteral(".hpp")) ||
-            path.endsWith(QStringLiteral(".py")) || path.endsWith(QStringLiteral(".js")) ||
-            path.endsWith(QStringLiteral(".ts")) || path.endsWith(QStringLiteral(".java")) ||
-            path.endsWith(QStringLiteral(".rs")) || path.endsWith(QStringLiteral(".go")) ||
-            path.endsWith(QStringLiteral(".cmake")) || path.endsWith(QStringLiteral(".txt")) ||
-            path.endsWith(QStringLiteral(".md")) || path.endsWith(QStringLiteral(".json")) ||
-            path.endsWith(QStringLiteral(".xml")) || path.endsWith(QStringLiteral(".yaml")) ||
-            path.endsWith(QStringLiteral(".yml"))) {
-            files.append(path);
+        const int dotIndex = path.lastIndexOf(QLatin1Char('.'));
+        if (dotIndex != -1) {
+            const QStringView suffix = QStringView(path).mid(dotIndex + 1);
+            if (allowedExtensions.contains(suffix)) {
+                files.append(path);
+            }
         }
     }
     return files;
