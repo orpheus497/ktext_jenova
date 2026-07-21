@@ -142,8 +142,8 @@ QString ContextManager::getAgentsInstruction(const QString &projectRoot) const
         // ##Condition purpose: Prevent path traversal via symlinks.
         if (!canonFile.startsWith(canonRoot)) continue;
 
-        // ##Condition purpose: Return cached agent instructions if available.
         auto it = m_agentsCache.constFind(canonFile);
+        // ##Condition purpose: Return cached agent instructions if available.
         if (it != m_agentsCache.constEnd()) {
             return *it;
         }
@@ -155,16 +155,22 @@ QString ContextManager::getAgentsInstruction(const QString &projectRoot) const
             QTextStream in(&file);
             QString content = in.readAll();
 
-            // ##Step purpose: Ensure file is watched for changes to invalidate cache properly.
+            // ##Condition purpose: Ensure file is watched for changes to invalidate cache properly.
             if (!m_fileWatcher) {
+                // ##Action purpose: Create the watcher instance.
                 m_fileWatcher = new QFileSystemWatcher(const_cast<ContextManager*>(this));
+                // ##Action purpose: Connect the file change signal to invalidate the cache.
                 connect(m_fileWatcher, &QFileSystemWatcher::fileChanged,
                         this, &ContextManager::onAgentsFileChanged);
             }
+
+            // ##Action purpose: Register the file path to be monitored.
             m_fileWatcher->addPath(canonFile);
 
-            // ##Action purpose: Cache the content now that an invalidation path is guaranteed.
-            m_agentsCache.insert(canonFile, content);
+            if (m_fileWatcher->files().contains(canonFile)) {
+                // ##Action purpose: Cache the content now that an invalidation path is guaranteed.
+                m_agentsCache.insert(canonFile, content);
+            }
 
             return content;
         }
@@ -175,6 +181,7 @@ QString ContextManager::getAgentsInstruction(const QString &projectRoot) const
 // ##Method purpose: Slot to clear cache entry when the underlying AGENTS.md file changes on disk.
 void ContextManager::onAgentsFileChanged(const QString &path)
 {
+    // ##Action purpose: Remove the cached entry for the modified file.
     m_agentsCache.remove(path);
 }
 
