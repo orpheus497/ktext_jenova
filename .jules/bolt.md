@@ -7,9 +7,11 @@
 **Action:** Always accumulate text chunks within `canReadLine()` loops and emit them once per network event.
 
 ## 2024-11-20 - Fast String Extension Matching in Qt
+
 **Learning:** Checking for many different file extensions in a hot loop using chained `QString::endsWith(QStringLiteral(...))` calls is slow (O(N) comparisons).
 **Action:** Use a `static const QSet<QStringView>` with literal `u"ext"` initializers, then extract the suffix using `path.lastIndexOf('.')` and `QStringView(path).mid(dotIndex + 1)` for an O(1) hash map lookup.
 
 ## 2024-11-20 - Fast String Moves in Qt
+
 **Learning:** Appending locally scoped strings (like `QString`) to a container without using `std::move` causes unnecessary atomic reference count bumps on the string's internal buffer.
 **Action:** When a local `QString` or similar copy-on-write object is no longer needed after being appended to a container (e.g., `QStringList::append()`), wrap it in `std::move()` to transfer ownership efficiently.

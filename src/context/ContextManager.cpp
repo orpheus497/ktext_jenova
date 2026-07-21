@@ -18,6 +18,7 @@
 #include <QStringBuilder>
 #include <QSet>
 #include <QStringView>
+#include <utility>
 
 // ##Method purpose: Helper to extract semantic context from KDevelop DUChain AST
 static QString getSemanticASTString(KTextEditor::View *view, const QString &header)
@@ -289,20 +290,25 @@ QStringList ContextManager::getProjectFiles() const
     // ##Step purpose: Recursively collect all file items from the project model.
     const auto allFiles = project->fileSet();
 
-    // ⚡ Bolt: Use a QSet of QStringView for O(1) extension lookups instead of chained O(N) string comparisons.
+    // ##Step purpose: ⚡ Bolt: Use a QSet of QStringView for O(1) extension lookups instead of chained O(N) string comparisons.
     // This provides a measurable speedup during large project traversals by avoiding repeated `endsWith` calls.
     static const QSet<QStringView> allowedExtensions = {
         u"cpp", u"h", u"c", u"hpp", u"py", u"js", u"ts", u"java",
         u"rs", u"go", u"cmake", u"txt", u"md", u"json", u"xml", u"yaml", u"yml"
     };
 
+    // ##Loop purpose: Iterate through project files to collect source-like code files.
     for (const auto &indexedString : allFiles) {
         QString path = indexedString.str();
-        // ##Condition purpose: Only include source-like files, not build artifacts.
+
+        // ##Condition purpose: Guard against files with no extension to prevent out-of-bounds slicing.
         const int dotIndex = path.lastIndexOf(QLatin1Char('.'));
         if (dotIndex != -1) {
+            // ##Step purpose: Extract the file extension string view efficiently without allocating new memory.
             const QStringView suffix = QStringView(path).mid(dotIndex + 1);
+            // ##Condition purpose: Only include source-like files, not build artifacts.
             if (allowedExtensions.contains(suffix)) {
+                // ##Step purpose: Move the string into the file list to prevent a redundant atomic reference count bump.
                 files.append(std::move(path));
             }
         }
