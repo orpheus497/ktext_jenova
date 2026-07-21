@@ -66,7 +66,9 @@ static QString getTruncatedDocumentText(KTextEditor::Document *doc, int maxLengt
 }
 
 // ##Method purpose: Constructor implementation.
-ContextManager::ContextManager(QObject *parent) : QObject(parent) {}
+ContextManager::ContextManager(QObject *parent) : QObject(parent) {
+    m_projectRootCache.setMaxCost(100);
+}
 
 KDevelop::IProject* ContextManager::projectForUrl(const QUrl &url) const
 {
@@ -92,14 +94,23 @@ QString ContextManager::getProjectRoot(KTextEditor::Document *doc) const
         return proj->path().toLocalFile();
     }
     
+    QString filePath = doc->url().toLocalFile();
+    if (QString* cachedRoot = m_projectRootCache.object(filePath)) {
+        return *cachedRoot;
+    }
+
     // Fallback to directory scanning if not in a KDevelop project
-    QDir dir = QFileInfo(doc->url().toLocalFile()).absoluteDir();
+    QDir dir = QFileInfo(filePath).absoluteDir();
     while (dir.absolutePath() != QStringLiteral("/")) {
         if (dir.exists(QStringLiteral(".git")) || dir.exists(QStringLiteral("CMakeLists.txt"))) {
-            return dir.absolutePath();
+            QString rootPath = dir.absolutePath();
+            m_projectRootCache.insert(filePath, new QString(rootPath));
+            return rootPath;
         }
         dir.cdUp();
     }
+
+    m_projectRootCache.insert(filePath, new QString());
     return QString();
 }
 
