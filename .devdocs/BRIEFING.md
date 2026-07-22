@@ -1,13 +1,22 @@
 # Project Briefing
 
-**Timestamp**: 2026-07-18 00:34
+**Timestamp**: 2026-07-22 14:33
 
 ## Status
 - **Current Phase**: Phase 24 (Comprehensive Codebase Audit & Stabilisation) — **COMPLETE**.
-- **Step**: All approved phases executed. Build passes cleanly.
+- **Step**: Resolved merge conflicts and applied PR feedback annotations to ContextManager.cpp.
 - **Progress**: 100%.
 
 ## Previous Session Accomplishments
+- Resolved merge conflicts in ContextManager and documentation.
+- Added ##Step and ##Action annotations to ContextManager.cpp caching logic per PR review.
+- Resolved PR 47 merge conflicts across the codebase:
+  - Resolved sentinel journal append formatting conflicts.
+  - Integrated both `testDeleteConversation()` and `testFileContextAggregation()` into the test suite.
+- Resolved PR #49 review issues on the branch:
+  - Refactored `QMessageBox::question` conversation delete confirmation into a virtual protected method `askDeletionConfirmation()` inside `AiChatWidget`.
+  - Added unit test coverage for conversation deletion in `TestAiChatWidget` using a `TestableAiChatWidget` mock subclass.
+  - Configured `QMessageBox::question` default button explicitly to `QMessageBox::No` and refined annotations.
 - Completed full audit of all source/test/build files.
 - Executed 6-phase implementation plan:
   - Phase A: Critical bug fixes (dangling pointers, stale range, response validation).

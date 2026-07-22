@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QJsonArray>
 #include <QUrl>
+#include <QMessageBox>
 
 class QListView;
 class QComboBox;
@@ -50,6 +51,10 @@ private Q_SLOTS:
 
     // ##Method purpose: Deletes the currently selected conversation from SQLite.
     void deleteCurrentConversation();
+
+protected:
+    // ##Method purpose: Prompts the user to confirm conversation deletion.
+    virtual QMessageBox::StandardButton askDeletionConfirmation();
 
 private:
     // ##Method purpose: Scrolls the list view to the bottom to show the latest message.

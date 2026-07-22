@@ -17,9 +17,12 @@
 #include <QScrollBar>
 #include <QJsonObject>
 #include <QRegularExpression>
+#include <QSet>
 #include <QTimer>
 #include <QDir>
+#include <KLocalizedString>
 #include <QFileInfo>
+#include <QMessageBox>
 
 #include <interfaces/icore.h>
 #include <interfaces/idocumentcontroller.h>
@@ -50,14 +53,14 @@ AiChatWidget::AiChatWidget(QWidget *parent)
     m_conversationSelector->setToolTip(QStringLiteral("Select a previous conversation"));
     toolbar->addWidget(m_conversationSelector);
 
-    auto *newChatBtn = new QPushButton(QIcon::fromTheme(QStringLiteral("document-new")), QString(), this);
+    // ##Action purpose: Create a 'New Chat' button.
+    auto *newChatBtn = new QPushButton(QIcon::fromTheme(QStringLiteral("document-new")), i18n("New"), this);
     newChatBtn->setToolTip(QStringLiteral("Start a new conversation"));
-    newChatBtn->setFlat(true);
     toolbar->addWidget(newChatBtn);
 
-    m_deleteBtn = new QPushButton(QIcon::fromTheme(QStringLiteral("edit-delete")), QString(), this);
+    // ##Action purpose: Create a 'Delete Chat' button.
+    m_deleteBtn = new QPushButton(QIcon::fromTheme(QStringLiteral("edit-delete")), i18n("Delete"), this);
     m_deleteBtn->setToolTip(QStringLiteral("Delete the selected conversation"));
-    m_deleteBtn->setFlat(true);
     m_deleteBtn->setEnabled(false);
     toolbar->addWidget(m_deleteBtn);
 
@@ -171,6 +174,7 @@ QString AiChatWidget::resolveFileReferences(const QString &text) const
 {
     static const QRegularExpression fileRefRe(QStringLiteral("@(\\S+)"));
     QString contextBlock;
+    QSet<QString> processedPaths;
 
     auto it = fileRefRe.globalMatch(text);
     // ##Loop purpose: Find all @file references in the user message.
@@ -180,7 +184,16 @@ QString AiChatWidget::resolveFileReferences(const QString &text) const
 
         // ##Step purpose: Resolve the path against the project root before extracting context.
         QString resolvedPath = resolveFilePath(rawPath);
-        if (resolvedPath.isEmpty()) continue;
+        // ##Action purpose: Generate a canonical path key for safe duplication checks.
+        QString normalizedKey = QFileInfo(resolvedPath).canonicalFilePath();
+        // ##Condition purpose: Fallback to a cleaned resolved path if canonicalization fails.
+        if (normalizedKey.isEmpty()) normalizedKey = QDir::cleanPath(resolvedPath);
+
+        // ##Condition purpose: Prevent duplication of already extracted file context.
+        if (resolvedPath.isEmpty() || processedPaths.contains(normalizedKey)) {
+            continue;
+        }
+        processedPaths.insert(normalizedKey);
 
         QString fileContext = m_context->extractRelevantFileContext(resolvedPath);
         if (!fileContext.isEmpty()) {
@@ -219,8 +232,17 @@ void AiChatWidget::sendMessage(const QString &text)
     }
     QString sysPrompt = m_context->buildSystemPrompt(activeView);
 
-    // ##Step purpose: Resolve any @file references and append their context to the system prompt.
-    QString fileContext = resolveFileReferences(text);
+    // ##Step purpose: Resolve any @file references from the entire conversation and append their context to the system prompt.
+    QString allTextForRefs = text;
+    // ##Loop purpose: Accumulate user messages to correctly resolve all historical file context.
+    for (const auto &msg : m_messageHistory) {
+        QJsonObject obj = msg.toObject();
+        // ##Condition purpose: Extract only user message content for file references.
+        if (obj[QStringLiteral("role")].toString() == QStringLiteral("user")) {
+            allTextForRefs += QStringLiteral(" ") + obj[QStringLiteral("content")].toString();
+        }
+    }
+    QString fileContext = resolveFileReferences(allTextForRefs);
     if (!fileContext.isEmpty()) {
         sysPrompt += fileContext;
     }
@@ -365,6 +387,17 @@ void AiChatWidget::loadConversation(int comboIndex)
     m_conversationSelector->setCurrentIndex(comboIndex);
 }
 
+// ##Method purpose: Prompts the user to confirm conversation deletion.
+QMessageBox::StandardButton AiChatWidget::askDeletionConfirmation()
+{
+    // ##Step purpose: Display standard question box for deletion confirmation.
+    // ##Action purpose: Prompt user via QMessageBox::question dialog with QMessageBox::No as default.
+    return QMessageBox::question(this, i18n("Confirm Delete"),
+                                  i18n("Are you sure you want to delete this conversation?"),
+                                  QMessageBox::Yes | QMessageBox::No,
+                                  QMessageBox::No);
+}
+
 // ##Method purpose: Deletes the conversation selected in the combo box from SQLite.
 void AiChatWidget::deleteCurrentConversation()
 {
@@ -372,6 +405,13 @@ void AiChatWidget::deleteCurrentConversation()
     qint64 convId = m_conversationSelector->itemData(idx).toLongLong();
     // ##Condition purpose: Ignore the placeholder entry.
     if (convId <= 0) return;
+
+    // ##Step purpose: Request user confirmation before deletion.
+    QMessageBox::StandardButton reply = askDeletionConfirmation();
+    // ##Condition purpose: Abort deletion if confirmation was not approved.
+    if (reply != QMessageBox::Yes) {
+        return;
+    }
 
     m_database->deleteConversation(convId);
 
