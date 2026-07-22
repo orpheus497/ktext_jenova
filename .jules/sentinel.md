@@ -14,7 +14,6 @@
 **Prevention:** When traversing up a directory tree using `QDir`, always rely on `QDir::isRoot()` as the loop terminator and check the return value of `dir.cdUp()` to safely break on traversal failure.
 
 ## 2024-07-21 - XSS/HTML Injection in QTextDocument Markdown Parsing
-
 **Vulnerability:** Raw HTML execution via untrusted AI chat responses inside Qt's Markdown renderer (`QTextDocument::setMarkdown`).
 **Learning:** `QTextDocument::setMarkdown` defaults to allowing embedded HTML tags even when `QTextDocument::MarkdownDialectGitHub` is used. If this is not explicitly disabled, LLMs generating raw HTML (like `<script>alert(1)</script>` or fake login forms) will be evaluated and rendered within the desktop application.
 **Prevention:** To prevent XSS or HTML injection when rendering untrusted markdown in Qt, ALWAYS apply the QTextDocument::MarkdownNoHTML feature flag by combining it with the desired dialect using the bitwise OR operator (e.g., QTextDocument::MarkdownDialectGitHub | QTextDocument::MarkdownNoHTML).
