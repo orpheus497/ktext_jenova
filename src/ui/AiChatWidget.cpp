@@ -387,6 +387,15 @@ void AiChatWidget::loadConversation(int comboIndex)
     m_conversationSelector->setCurrentIndex(comboIndex);
 }
 
+// ##Method purpose: Prompts the user to confirm conversation deletion.
+QMessageBox::StandardButton AiChatWidget::askDeletionConfirmation()
+{
+    // ##Step purpose: Display standard question box for deletion confirmation.
+    return QMessageBox::question(this, i18n("Confirm Delete"),
+                                  i18n("Are you sure you want to delete this conversation?"),
+                                  QMessageBox::Yes | QMessageBox::No);
+}
+
 // ##Method purpose: Deletes the conversation selected in the combo box from SQLite.
 void AiChatWidget::deleteCurrentConversation()
 {
@@ -395,10 +404,9 @@ void AiChatWidget::deleteCurrentConversation()
     // ##Condition purpose: Ignore the placeholder entry.
     if (convId <= 0) return;
 
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, i18n("Confirm Delete"),
-                                  i18n("Are you sure you want to delete this conversation?"),
-                                  QMessageBox::Yes | QMessageBox::No);
+    // ##Step purpose: Request user confirmation before deletion.
+    QMessageBox::StandardButton reply = askDeletionConfirmation();
+    // ##Condition purpose: Abort deletion if confirmation was not approved.
     if (reply != QMessageBox::Yes) {
         return;
     }
