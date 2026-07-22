@@ -208,7 +208,6 @@ bool TestAiChatWidget::testFileContextAggregation() {
     secondUserMsg[QStringLiteral("role")] = QStringLiteral("user");
     secondUserMsg[QStringLiteral("content")] = QStringLiteral("Now check @src/utils.cpp");
     widget.m_messageHistory.append(secondUserMsg);
-
     // ##Action purpose: Send the third message repeating the first file reference.
     widget.sendMessage(QStringLiteral("Let's look at @src/main.cpp again"));
 

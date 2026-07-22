@@ -17,6 +17,9 @@
 #include <util/path.h>
 #include <QStringBuilder>
 #include <QFileSystemWatcher>
+#include <QSet>
+#include <QStringView>
+#include <utility>
 
 // ##Method purpose: Helper to extract semantic context from KDevelop DUChain AST
 static QString getSemanticASTString(KTextEditor::View *view, const QString &header)
@@ -152,16 +155,23 @@ QString ContextManager::getAgentsInstruction(const QString &projectRoot) const
             QTextStream in(&file);
             QString content = in.readAll();
 
-            // ##Step purpose: Ensure file is watched for changes to invalidate cache properly.
+            // ##Condition purpose: Ensure file is watched for changes to invalidate cache properly.
             if (!m_fileWatcher) {
+                // ##Action purpose: Create the watcher instance.
                 m_fileWatcher = new QFileSystemWatcher(const_cast<ContextManager*>(this));
+                // ##Action purpose: Connect the file change signal to invalidate the cache.
                 connect(m_fileWatcher, &QFileSystemWatcher::fileChanged,
                         this, &ContextManager::onAgentsFileChanged);
             }
+
+            // ##Action purpose: Register the file path to be monitored.
             m_fileWatcher->addPath(canonFile);
 
-            // ##Action purpose: Cache the content now that an invalidation path is guaranteed.
-            m_agentsCache.insert(canonFile, content);
+            // ##Condition purpose: Cache the content only when the canonical file is successfully tracked by the watcher to guarantee its invalidation path.
+            if (m_fileWatcher->files().contains(canonFile)) {
+                // ##Action purpose: Cache the content now that an invalidation path is guaranteed.
+                m_agentsCache.insert(canonFile, content);
+            }
 
             return content;
         }
@@ -172,6 +182,7 @@ QString ContextManager::getAgentsInstruction(const QString &projectRoot) const
 // ##Method purpose: Slot to clear cache entry when the underlying AGENTS.md file changes on disk.
 void ContextManager::onAgentsFileChanged(const QString &path)
 {
+    // ##Action purpose: Remove the cached entry for the modified file.
     m_agentsCache.remove(path);
 }
 
@@ -312,19 +323,28 @@ QStringList ContextManager::getProjectFiles() const
 
     // ##Step purpose: Recursively collect all file items from the project model.
     const auto allFiles = project->fileSet();
+
+    // ##Step purpose: ⚡ Bolt: Use a QSet of QStringView for O(1) extension lookups instead of chained O(N) string comparisons.
+    // This provides a measurable speedup during large project traversals by avoiding repeated `endsWith` calls.
+    static const QSet<QStringView> allowedExtensions = {
+        u"cpp", u"h", u"c", u"hpp", u"py", u"js", u"ts", u"java",
+        u"rs", u"go", u"cmake", u"txt", u"md", u"json", u"xml", u"yaml", u"yml"
+    };
+
+    // ##Loop purpose: Iterate through project files to collect source-like code files.
     for (const auto &indexedString : allFiles) {
         QString path = indexedString.str();
-        // ##Condition purpose: Only include source-like files, not build artifacts.
-        if (path.endsWith(QStringLiteral(".cpp")) || path.endsWith(QStringLiteral(".h")) ||
-            path.endsWith(QStringLiteral(".c")) || path.endsWith(QStringLiteral(".hpp")) ||
-            path.endsWith(QStringLiteral(".py")) || path.endsWith(QStringLiteral(".js")) ||
-            path.endsWith(QStringLiteral(".ts")) || path.endsWith(QStringLiteral(".java")) ||
-            path.endsWith(QStringLiteral(".rs")) || path.endsWith(QStringLiteral(".go")) ||
-            path.endsWith(QStringLiteral(".cmake")) || path.endsWith(QStringLiteral(".txt")) ||
-            path.endsWith(QStringLiteral(".md")) || path.endsWith(QStringLiteral(".json")) ||
-            path.endsWith(QStringLiteral(".xml")) || path.endsWith(QStringLiteral(".yaml")) ||
-            path.endsWith(QStringLiteral(".yml"))) {
-            files.append(path);
+
+        // ##Condition purpose: Guard against files with no extension to prevent out-of-bounds slicing.
+        const int dotIndex = path.lastIndexOf(QLatin1Char('.'));
+        if (dotIndex != -1) {
+            // ##Step purpose: Extract the file extension string view efficiently without allocating new memory.
+            const QStringView suffix = QStringView(path).mid(dotIndex + 1);
+            // ##Condition purpose: Only include source-like files, not build artifacts.
+            if (allowedExtensions.contains(suffix)) {
+                // ##Step purpose: Move the string into the file list to prevent a redundant atomic reference count bump.
+                files.append(std::move(path));
+            }
         }
     }
     return files;
