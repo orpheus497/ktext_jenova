@@ -176,6 +176,21 @@ QString AiChatWidget::resolveFileReferences(const QString &text) const
     QString contextBlock;
     QSet<QString> processedPaths;
 
+    auto *core = KDevelop::ICore::self();
+    QList<QString> trustedRoots;
+    if (core && core->projectController()) {
+        auto projects = core->projectController()->projects();
+        for (auto *project : projects) {
+            QString canonRoot = QFileInfo(project->path().toLocalFile()).canonicalFilePath();
+            if (!canonRoot.isEmpty()) {
+                if (!canonRoot.endsWith(QLatin1Char('/'))) {
+                    canonRoot += QLatin1Char('/');
+                }
+                trustedRoots.append(canonRoot);
+            }
+        }
+    }
+
     auto it = fileRefRe.globalMatch(text);
     // ##Loop purpose: Find all @file references in the user message.
     while (it.hasNext()) {
@@ -188,6 +203,35 @@ QString AiChatWidget::resolveFileReferences(const QString &text) const
         QString normalizedKey = QFileInfo(resolvedPath).canonicalFilePath();
         // ##Condition purpose: Fallback to a cleaned resolved path if canonicalization fails.
         if (normalizedKey.isEmpty()) normalizedKey = QDir::cleanPath(resolvedPath);
+
+        // ##Condition purpose: Prevent path traversal by verifying the canonical path is within a trusted project root.
+        bool isTrusted = false;
+
+        // ##Condition purpose: If we have projects, enforce strict boundaries.
+        if (!trustedRoots.isEmpty()) {
+            for (const QString &trustedRoot : trustedRoots) {
+                if (normalizedKey.startsWith(trustedRoot)) {
+                    isTrusted = true;
+                    break;
+                }
+            }
+        } else {
+            // ##Condition purpose: If no projects are open, fallback to strictly binding to the active document's directory.
+            auto activeDoc = core ? core->documentController()->activeDocument() : nullptr;
+            if (activeDoc && activeDoc->textDocument()) {
+                QString docDir = QFileInfo(activeDoc->textDocument()->url().toLocalFile()).absolutePath();
+                QString canonDocDir = QFileInfo(docDir).canonicalFilePath();
+                if (!canonDocDir.isEmpty()) {
+                    if (!canonDocDir.endsWith(QLatin1Char('/'))) canonDocDir += QLatin1Char('/');
+                    if (normalizedKey.startsWith(canonDocDir)) {
+                        isTrusted = true;
+                    }
+                }
+            }
+        }
+        if (!isTrusted) {
+            continue;
+        }
 
         // ##Condition purpose: Prevent duplication of already extracted file context.
         if (resolvedPath.isEmpty() || processedPaths.contains(normalizedKey)) {

@@ -17,3 +17,8 @@
 **Vulnerability:** Raw HTML execution via untrusted AI chat responses inside Qt's Markdown renderer (`QTextDocument::setMarkdown`).
 **Learning:** `QTextDocument::setMarkdown` defaults to allowing embedded HTML tags even when `QTextDocument::MarkdownDialectGitHub` is used. If this is not explicitly disabled, LLMs generating raw HTML (like `<script>alert(1)</script>` or fake login forms) will be evaluated and rendered within the desktop application.
 **Prevention:** To prevent XSS or HTML injection when rendering untrusted markdown in Qt, ALWAYS apply the QTextDocument::MarkdownNoHTML feature flag by combining it with the desired dialect using the bitwise OR operator (e.g., QTextDocument::MarkdownDialectGitHub | QTextDocument::MarkdownNoHTML).
+
+## 2024-07-23 - Path Traversal in @file References
+**Vulnerability:** Path traversal and arbitrary file read through LLM `@file` command resolution (e.g. `@../../../../etc/passwd` or using symlinks).
+**Learning:** `QFileInfo(resolvedPath).canonicalFilePath()` prevents `..` attacks, but if we don't subsequently verify that the resulting canonical file path is inside our expected, trusted working directory, an attacker or a malicious LLM can still access arbitrary files on the OS if the IDE resolves them.
+**Prevention:** After getting the `canonicalFilePath` of user input, always gather a list of trusted root directories, calculate their `canonicalFilePath()` (making sure to append a `/` to prevent prefix bypasses), and verify that the resolved file's canonical path `startsWith()` one of the trusted canonical roots.
