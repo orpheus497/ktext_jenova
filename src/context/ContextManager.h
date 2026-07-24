@@ -3,12 +3,9 @@
 #include <QObject>
 #include <QString>
 #include <QUrl>
-<<<<<<< HEAD
 #include <QCache>
-=======
 #include <QHash>
 #include <QFileSystemWatcher>
->>>>>>> main
 #include <KTextEditor/Document>
 #include <KTextEditor/View>
 
@@ -29,8 +26,6 @@ public:
 private:
     // ##Method purpose: Helper method to get the KDevelop project for a given URL.
     KDevelop::IProject* projectForUrl(const QUrl &url) const;
-
-    mutable QCache<QString, QString> m_projectRootCache;
 
 public:
     // ##Method purpose: Determines the project root directory from a given document.

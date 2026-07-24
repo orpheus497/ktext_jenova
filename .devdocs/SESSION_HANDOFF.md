@@ -1,11 +1,35 @@
-<<<<<<< HEAD
 # Session Handoff Log
-**Timestamp**: 2026-07-21 00:22
-* **Accomplishments**: Fixed DoS vulnerability in `ContextManager::getProjectRoot` where directory traversal could loop infinitely. Replaced hardcoded "/" check with `dir.isRoot()` and checked `cdUp()` return value.
-* **Modified Files**: `src/context/ContextManager.cpp`
-* **Decisions**: Relied on QDir standard methods to ensure cross-platform compatibility and robustness. Verified with standalone script due to missing KDE dev headers.
-* **Next Steps**: Submit PR.
-=======
+
+**Timestamp**: 2026-07-24 10:07
+* **Session Focus**: Qt6 Enum Flag Type Casting.
+* **Accomplishments**:
+  - Explicitly wrapped `QTextDocument::MarkdownDialectGitHub | QTextDocument::MarkdownNoHTML` in `QTextDocument::MarkdownFeatures(...)` in `src/ui/ChatMessageDelegate.cpp`.
+* **Modified Files**: `src/ui/ChatMessageDelegate.cpp`.
+* **Next Steps**: Run `make` in `build/` to verify target completion.
+
+---
+
+**Timestamp**: 2026-07-24 10:04
+* **Session Focus**: Permanent Header Normalization & MOC Restoration.
+* **Accomplishments**:
+  - Purged all stashed Git conflict markers from `src/context/ContextManager.h` and `src/ui/ChatMessageDelegate.h`.
+  - Fully defined `QTextDocument` and `QCache` includes in `ChatMessageDelegate.h` for MOC parsing.
+  - Verified project-wide zero conflict markers.
+* **Modified Files**: `src/context/ContextManager.h`, `src/ui/ChatMessageDelegate.h`, `.devdocs/*`.
+* **Next Steps**: Run `make` in `build/` to verify target build.
+
+---
+
+**Timestamp**: 2026-07-24 10:00
+* **Session Focus**: Build & Compilation Repair.
+* **Accomplishments**:
+  - Cleared unresolved Git merge conflict markers from `src/context/ContextManager.h`.
+  - Added `#include <QMessageBox>` to `src/ui/AiChatWidget.h`.
+  - Added `#include <QTextDocument>` to `src/ui/ChatMessageDelegate.h`.
+* **Modified Files**: `src/context/ContextManager.h`, `src/ui/AiChatWidget.h`, `src/ui/ChatMessageDelegate.h`.
+* **Next Steps**: Execute `make` in `build/` to verify target build.
+
+---
 **Timestamp**: 2026-07-22 13:57
 * **Session Focus**: PR 47 Merge Conflict Resolution.
 * **Accomplishments**:
@@ -17,7 +41,6 @@
 * **Next Steps**: Merge the branch with main, verify compiling, and run tests.
 
 ---
->>>>>>> main
 
 **Timestamp**: 2026-07-18 00:48
 * **Session Focus**: Critical bugfixes — settings crash, conversation history, timeout, thinking indicator.
@@ -138,6 +161,7 @@
 
 ### Next Steps
 - Verify that the user successfully locates the side panel under the Window menu and that Autocomplete performs as expected.
+# Session Handoff Log
 
 **Timestamp**: 2026-07-03 01:43
 ## Phase 14 Cleanup & Docs Session
