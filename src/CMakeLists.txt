@@ -6,8 +6,7 @@ set(kdevllm_SRCS
     KDevLLMPlugin.cpp
     ui/AiChatWidget.cpp
     ui/AiChatInputWidget.cpp
-    ui/ChatMessageModel.cpp
-    ui/ChatMessageDelegate.cpp
+    ui/ChatMessageWidget.cpp
     context/ContextManager.cpp
     completion/AiCompletionModel.cpp
     config/AiConfigPage.cpp
@@ -27,6 +26,7 @@ target_link_libraries(kdevllm
     KDev::Language
     KF6::ConfigCore
     KF6::I18n
+    KF6::TextEditor
     Qt6::Core
     Qt6::Widgets
     Qt6::Network

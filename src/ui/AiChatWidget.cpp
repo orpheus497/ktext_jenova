@@ -1,8 +1,7 @@
-// ##Script function and purpose: Implements the native chat UI with QListView, SQLite history, @file context, and conversation management.
+// ##Script function and purpose: Implements the native chat UI with QScrollArea, SQLite history, @file context, and conversation management.
 #include "AiChatWidget.h"
 #include "AiChatInputWidget.h"
-#include "ChatMessageModel.h"
-#include "ChatMessageDelegate.h"
+#include "ChatMessageWidget.h"
 #include "../network/LlamaClient.h"
 #include "../context/ContextManager.h"
 #include "../storage/ChatDatabase.h"
@@ -11,7 +10,7 @@
 #include <KTextEditor/Document>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QListView>
+#include <QScrollArea>
 #include <QComboBox>
 #include <QPushButton>
 #include <QScrollBar>
@@ -37,8 +36,7 @@ AiChatWidget::AiChatWidget(QWidget *parent)
     , m_client(new LlamaClient(this))
     , m_context(new ContextManager(this))
     , m_database(new ChatDatabase(this))
-    , m_messageModel(new ChatMessageModel(this))
-    , m_delegate(new ChatMessageDelegate(this))
+    , m_lastAssistantWidget(nullptr)
 {
     auto *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -66,19 +64,20 @@ AiChatWidget::AiChatWidget(QWidget *parent)
 
     layout->addLayout(toolbar);
 
-    // ##Step purpose: Create the native QListView for chat messages.
-    m_chatView = new QListView(this);
-    m_chatView->setModel(m_messageModel);
-    m_chatView->setItemDelegate(m_delegate);
-    m_chatView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    m_chatView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_chatView->setSelectionMode(QAbstractItemView::NoSelection);
-    m_chatView->setFrameStyle(QFrame::NoFrame);
-    m_chatView->setSpacing(2);
-    m_chatView->setWordWrap(true);
-    m_chatView->setResizeMode(QListView::Adjust);
-    m_chatView->setUniformItemSizes(false);
-    layout->addWidget(m_chatView, 1);
+    // ##Step purpose: Create the scroll area for chat messages.
+    m_chatScrollArea = new QScrollArea(this);
+    m_chatScrollArea->setWidgetResizable(true);
+    m_chatScrollArea->setFrameStyle(QFrame::NoFrame);
+    m_chatScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    
+    m_chatContainer = new QWidget(m_chatScrollArea);
+    m_chatLayout = new QVBoxLayout(m_chatContainer);
+    m_chatLayout->setContentsMargins(4, 4, 4, 4);
+    m_chatLayout->setSpacing(8);
+    m_chatLayout->setAlignment(Qt::AlignTop);
+    
+    m_chatScrollArea->setWidget(m_chatContainer);
+    layout->addWidget(m_chatScrollArea, 1);
     
     // ##Step purpose: Create the input area at the bottom.
     m_inputWidget = new AiChatInputWidget(this);
@@ -88,7 +87,7 @@ AiChatWidget::AiChatWidget(QWidget *parent)
     QStringList projectFiles = m_context->getProjectFiles();
     m_inputWidget->setAvailableFiles(projectFiles);
 
-    // ##Step purpose: Connect UI signals — both the toolbar button and the input widget's New Chat button.
+    // ##Step purpose: Connect UI signals.
     connect(m_inputWidget, &AiChatInputWidget::messageSubmitted, this, &AiChatWidget::sendMessage);
     connect(m_inputWidget, &AiChatInputWidget::stopClicked, m_client, &LlamaClient::stopChat);
     connect(m_inputWidget, &AiChatInputWidget::newChatClicked, this, &AiChatWidget::clearChat);
@@ -108,17 +107,21 @@ AiChatWidget::AiChatWidget(QWidget *parent)
     connect(m_client, &LlamaClient::errorOccurred, this, &AiChatWidget::onError);
     connect(m_client, &LlamaClient::warningOccurred, this, &AiChatWidget::onWarning);
 
-    // ##Step purpose: Ensure the view auto-scrolls when model content changes.
-    connect(m_messageModel, &QAbstractItemModel::rowsInserted, this, [this]() {
-        QTimer::singleShot(0, this, &AiChatWidget::scrollToBottom);
-    });
-    connect(m_messageModel, &QAbstractItemModel::dataChanged, this, [this]() {
-        QTimer::singleShot(0, this, &AiChatWidget::scrollToBottom);
-    });
-    
     // ##Step purpose: Start with a fresh conversation.
     refreshConversationList();
     clearChat();
+}
+
+void AiChatWidget::addMessageToUI(const QString& role, const QString& content, bool isStreaming)
+{
+    auto *widget = new ChatMessageWidget(role, content, isStreaming, m_chatContainer);
+    m_chatLayout->addWidget(widget);
+    if (isStreaming && role == QStringLiteral("assistant")) {
+        m_lastAssistantWidget = widget;
+    } else if (role == QStringLiteral("thinking")) {
+        m_lastAssistantWidget = widget; // Repurpose tracking for thinking indicator removal
+    }
+    QTimer::singleShot(0, this, &AiChatWidget::scrollToBottom);
 }
 
 // ##Method purpose: Resolves a relative file path against the current project root.
@@ -261,11 +264,11 @@ void AiChatWidget::sendMessage(const QString &text)
     }
 
     // ##Step purpose: Display the user message in the native list view.
-    m_messageModel->addMessage(QStringLiteral("user"), text);
+    addMessageToUI(QStringLiteral("user"), text, false);
     m_database->addMessage(m_currentConversationId, QStringLiteral("user"), text);
 
     // ##Step purpose: Show a "thinking" indicator so the user knows the system is waiting for the LLM.
-    m_messageModel->addMessage(QStringLiteral("thinking"), QStringLiteral("Waiting for response..."));
+    addMessageToUI(QStringLiteral("thinking"), QStringLiteral("Waiting for response..."), false);
 
     // ##Step purpose: Build the system prompt with fresh file context.
     KTextEditor::View* activeView = nullptr;
@@ -328,14 +331,37 @@ void AiChatWidget::sendMessage(const QString &text)
 void AiChatWidget::onChatTokenReceived(const QString &token)
 {
     m_currentAssistantResponse += token;
-    m_messageModel->appendToLastAssistant(token);
+    
+    if (!m_lastAssistantWidget || m_lastAssistantWidget->role() != QStringLiteral("assistant")) {
+        // First token received, replace the thinking indicator
+        if (m_lastAssistantWidget && m_lastAssistantWidget->role() == QStringLiteral("thinking")) {
+            m_chatLayout->removeWidget(m_lastAssistantWidget);
+            delete m_lastAssistantWidget;
+            m_lastAssistantWidget = nullptr;
+        }
+        addMessageToUI(QStringLiteral("assistant"), token, true);
+    } else {
+        m_lastAssistantWidget->appendStreamToken(token);
+    }
+    QTimer::singleShot(0, this, &AiChatWidget::scrollToBottom);
 }
 
 // ##Method purpose: Finalises the assistant message and persists it to SQLite.
 void AiChatWidget::onChatFinished()
 {
     m_inputWidget->setPromptRunning(false);
-    m_messageModel->finaliseLastAssistant();
+    
+    if (m_lastAssistantWidget) {
+        if (m_lastAssistantWidget->role() == QStringLiteral("thinking")) {
+            // Error occurred with no response, remove indicator
+            m_chatLayout->removeWidget(m_lastAssistantWidget);
+            delete m_lastAssistantWidget;
+            m_lastAssistantWidget = nullptr;
+        } else {
+            m_lastAssistantWidget->finalizeStream();
+            m_lastAssistantWidget = nullptr;
+        }
+    }
     
     if (!m_currentAssistantResponse.isEmpty()) {
         QJsonObject assistantMsg;
@@ -346,19 +372,24 @@ void AiChatWidget::onChatFinished()
         if (m_currentConversationId >= 0) {
             m_database->addMessage(m_currentConversationId, QStringLiteral("assistant"), m_currentAssistantResponse);
         }
-    } else {
-        m_messageModel->removeThinkingIndicator();
     }
 
     refreshConversationList();
+    QTimer::singleShot(0, this, &AiChatWidget::scrollToBottom);
 }
 
 // ##Method purpose: Displays a network or parsing error in the chat as a native error bubble.
 void AiChatWidget::onError(const QString &error)
 {
     m_inputWidget->setPromptRunning(false);
-    m_messageModel->removeThinkingIndicator();
-    m_messageModel->addMessage(QStringLiteral("error"), error);
+    
+    if (m_lastAssistantWidget && m_lastAssistantWidget->role() == QStringLiteral("thinking")) {
+        m_chatLayout->removeWidget(m_lastAssistantWidget);
+        delete m_lastAssistantWidget;
+        m_lastAssistantWidget = nullptr;
+    }
+    
+    addMessageToUI(QStringLiteral("error"), error, false);
 
     if (m_currentConversationId >= 0) {
         m_database->addMessage(m_currentConversationId, QStringLiteral("error"), error);
@@ -368,7 +399,7 @@ void AiChatWidget::onError(const QString &error)
 // ##Method purpose: Displays a security warning as a native warning bubble.
 void AiChatWidget::onWarning(const QString &warning)
 {
-    m_messageModel->addMessage(QStringLiteral("warning"), warning);
+    addMessageToUI(QStringLiteral("warning"), warning, false);
 }
 
 // ##Method purpose: Starts a new conversation.
@@ -377,9 +408,15 @@ void AiChatWidget::clearChat()
     m_messageHistory = QJsonArray();
     m_currentAssistantResponse.clear();
     m_currentConversationId = -1;
-    m_messageModel->clear();
+    m_lastAssistantWidget = nullptr;
+    
+    QLayoutItem *child;
+    while ((child = m_chatLayout->takeAt(0)) != nullptr) {
+        if (child->widget()) delete child->widget();
+        delete child;
+    }
 
-    m_messageModel->addMessage(QStringLiteral("welcome"),
+    addMessageToUI(QStringLiteral("welcome"),
         QStringLiteral("Welcome to KDev LLM, your AI Assistant for KDevelop!\n\n"
                        "• Chat: Type below and press Enter to ask questions about your code.\n"
                        "• @file: Reference project files for context (e.g. @src/main.cpp).\n"
@@ -400,7 +437,13 @@ void AiChatWidget::loadConversation(int comboIndex)
     m_currentConversationId = convId;
     m_messageHistory = QJsonArray();
     m_currentAssistantResponse.clear();
-    m_messageModel->clear();
+    m_lastAssistantWidget = nullptr;
+    
+    QLayoutItem *child;
+    while ((child = m_chatLayout->takeAt(0)) != nullptr) {
+        if (child->widget()) delete child->widget();
+        delete child;
+    }
 
     auto messages = m_database->getMessages(convId);
     // ##Loop purpose: Rebuild the visual model and the JSON history from database records.
@@ -417,7 +460,7 @@ void AiChatWidget::loadConversation(int comboIndex)
             continue;
         }
 
-        m_messageModel->addMessage(msg.role, msg.content);
+        addMessageToUI(msg.role, msg.content, false);
 
         // ##Condition purpose: Only user/assistant messages go to the LLM JSON history.
         if (msg.role == QStringLiteral("user") || msg.role == QStringLiteral("assistant")) {
@@ -467,10 +510,10 @@ void AiChatWidget::deleteCurrentConversation()
     }
 }
 
-// ##Method purpose: Scrolls the QListView to show the most recent message.
+// ##Method purpose: Scrolls the QScrollArea to show the most recent message.
 void AiChatWidget::scrollToBottom()
 {
-    QScrollBar *sb = m_chatView->verticalScrollBar();
+    QScrollBar *sb = m_chatScrollArea->verticalScrollBar();
     if (sb) {
         sb->setValue(sb->maximum());
     }

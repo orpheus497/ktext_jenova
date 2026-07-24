@@ -9,11 +9,12 @@
 class QListView;
 class QComboBox;
 class QPushButton;
+class QScrollArea;
+class QVBoxLayout;
 class AiChatInputWidget;
 class LlamaClient;
 class ContextManager;
-class ChatMessageModel;
-class ChatMessageDelegate;
+class ChatMessageWidget;
 class ChatDatabase;
 
 // ##Class purpose: Manages the native chat display, input, history persistence, and LLM streaming for the AI panel.
@@ -60,6 +61,9 @@ private:
     // ##Method purpose: Scrolls the list view to the bottom to show the latest message.
     void scrollToBottom();
 
+    // ##Method purpose: Helper to add a message widget to the layout.
+    void addMessageToUI(const QString& role, const QString& content, bool isStreaming = false);
+
     // ##Method purpose: Populates the conversation selector combo box from the database.
     void refreshConversationList();
 
@@ -72,10 +76,11 @@ private:
     LlamaClient *m_client;
     ContextManager *m_context;
     ChatDatabase *m_database;
-    ChatMessageModel *m_messageModel;
-    ChatMessageDelegate *m_delegate;
-
-    QListView *m_chatView;
+    
+    QScrollArea *m_chatScrollArea;
+    QWidget *m_chatContainer;
+    QVBoxLayout *m_chatLayout;
+    ChatMessageWidget *m_lastAssistantWidget;
     QComboBox *m_conversationSelector;
     QPushButton *m_deleteBtn;
     AiChatInputWidget *m_inputWidget;

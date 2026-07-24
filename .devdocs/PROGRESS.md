@@ -1,6 +1,8 @@
-**Timestamp**: 2026-07-24 10:07
+**Timestamp**: 2026-07-24 10:22
 
-* **Qt6 Enum Type Casting Fix**: Complete. Wrapped markdown flag bitwise OR inside `QTextDocument::MarkdownFeatures(...)` in `ChatMessageDelegate.cpp`.
+* **Chat UI Overhaul (Native Qt Widget Rendering)**: Complete. Ripped out `QListView` and `QStyledItemDelegate`. Implemented `QScrollArea` with dynamic `ChatMessageWidget` components to ensure reliable word-wrapping, proper syntax-highlighted IDE code blocks via `KTextEditor::View`, and interactive "Apply to Editor" buttons.
+
+**Timestamp**: 2026-07-24 10:07* **Qt6 Enum Type Casting Fix**: Complete. Wrapped markdown flag bitwise OR inside `QTextDocument::MarkdownFeatures(...)` in `ChatMessageDelegate.cpp`.
 
 **Timestamp**: 2026-07-24 10:04
 

@@ -1,6 +1,10 @@
-**Timestamp**: 2026-07-24 10:07
+**Timestamp**: 2026-07-24 10:22
 
-## Qt6 UI: Explicit QFlags Type Casting for Markdown Features
+## UI: QScrollArea and Native KTextEditor Widgets
+* **Decision**: Abandoned `QListView` and `QStyledItemDelegate` in favor of a `QScrollArea` containing a `QVBoxLayout` of custom `ChatMessageWidget` instances. Used `KTextEditor::Document` and `KTextEditor::View` to render LLM code blocks, and added explicit "Apply to Editor" buttons.
+* **Justification**: Manual painting of a `QTextDocument` on a `QListView` delegate was incapable of dynamically word-wrapping text correctly in a responsive IDE dock, leading to visually broken text cut-offs. Additionally, embedding real IDE text widgets enables full 100% accurate C++ syntax highlighting and native IDE interactions (like inserting code directly into the active tab), fulfilling the user's requirements for "proper blocks" and interaction.
+
+**Timestamp**: 2026-07-24 10:07## Qt6 UI: Explicit QFlags Type Casting for Markdown Features
 * **Decision**: Wrapped `QTextDocument::MarkdownDialectGitHub | QTextDocument::MarkdownNoHTML` in `QTextDocument::MarkdownFeatures(...)` inside `ChatMessageDelegate::createDoc()`.
 * **Justification**: In Qt 6, bitwise OR on enum values evaluates to `int`, which triggers strict type checking errors when passed to functions taking `QFlags<T>`. Explicitly constructing `QTextDocument::MarkdownFeatures` satisfies GCC type rules without `-fpermissive`.
 

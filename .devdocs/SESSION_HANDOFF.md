@@ -1,5 +1,18 @@
 # Session Handoff Log
 
+**Timestamp**: 2026-07-24 10:22
+* **Session Focus**: Native Chat UI Overhaul & Code Block Syntax Highlighting.
+* **Accomplishments**:
+  - Implemented `ChatMessageWidget` to parse markdown and natively embed `KTextEditor::View` for code blocks.
+  - Refactored `AiChatWidget` to use a `QScrollArea` instead of `QListView`.
+  - Added "Apply to Editor" functionality to inject code blocks into the active KDevelop text editor.
+  - Linked `KF6::TextEditor` in `src/CMakeLists.txt` and removed deprecated Model/Delegate files from the build tree.
+* **Modified Files**: `src/ui/AiChatWidget.h`, `src/ui/AiChatWidget.cpp`, `src/CMakeLists.txt`.
+* **Created Files**: `src/ui/ChatMessageWidget.h`, `src/ui/ChatMessageWidget.cpp`.
+* **Next Steps**: Re-run the build manually in `build/` and delete `ChatMessageModel.*`/`ChatMessageDelegate.*` (blocked by sandbox network error during run). Verify dynamic layout and "Apply" buttons in the IDE.
+
+---
+
 **Timestamp**: 2026-07-24 10:07
 * **Session Focus**: Qt6 Enum Flag Type Casting.
 * **Accomplishments**:

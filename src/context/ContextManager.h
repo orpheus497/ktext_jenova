@@ -52,5 +52,6 @@ private Q_SLOTS:
 
 private:
     mutable QHash<QString, QString> m_agentsCache;
+    mutable QCache<QString, QString> m_projectRootCache;
     mutable QFileSystemWatcher* m_fileWatcher = nullptr;
 };
