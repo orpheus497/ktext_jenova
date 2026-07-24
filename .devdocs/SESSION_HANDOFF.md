@@ -1,5 +1,17 @@
 # Session Handoff Log
 
+**Timestamp**: 2026-07-24 10:45
+* **Session Focus**: Context Pipeline and Streaming Performance Fixes.
+* **Accomplishments**:
+  - Implemented dynamic code block sizing and native rounded rendering in `ChatMessageWidget`.
+  - Moved Markdown parsing to a throttled timer in `ChatMessageWidget` to resolve massive stream delays.
+  - Expanded context extraction caps to 1000 lines for @file and 120000 characters for active documents in `ContextManager`.
+  - Fixed active view selection resolution in `AiChatWidget`.
+* **Modified Files**: `src/ui/ChatMessageWidget.h`, `src/ui/ChatMessageWidget.cpp`, `src/ui/AiChatWidget.cpp`, `src/context/ContextManager.cpp`.
+* **Next Steps**: Await user verification of the UI and performance improvements.
+
+---
+
 **Timestamp**: 2026-07-24 10:22
 * **Session Focus**: Native Chat UI Overhaul & Code Block Syntax Highlighting.
 * **Accomplishments**:

@@ -276,6 +276,9 @@ void AiChatWidget::sendMessage(const QString &text)
     auto activeDoc = core ? core->documentController()->activeDocument() : nullptr;
     if (activeDoc) {
         activeView = activeDoc->activeTextView();
+        if (!activeView && activeDoc->textDocument() && !activeDoc->textDocument()->views().isEmpty()) {
+            activeView = activeDoc->textDocument()->views().first();
+        }
     }
     QString sysPrompt = m_context->buildSystemPrompt(activeView);
 

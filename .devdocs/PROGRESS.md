@@ -1,3 +1,7 @@
+**Timestamp**: 2026-07-24 10:45
+
+* **Chat Rendering and Context Pipeline Fixes**: Complete. Fixed UI clipping and truncation issues by updating ChatMessageWidget to use dynamic code block sizing and native rounded rendering. Resolved massive stream delays by moving Markdown parsing to a throttled timer. Expanded context extraction caps to 1000 lines for @file and 120000 characters for active documents.
+
 **Timestamp**: 2026-07-24 10:22
 
 * **Chat UI Overhaul (Native Qt Widget Rendering)**: Complete. Ripped out `QListView` and `QStyledItemDelegate`. Implemented `QScrollArea` with dynamic `ChatMessageWidget` components to ensure reliable word-wrapping, proper syntax-highlighted IDE code blocks via `KTextEditor::View`, and interactive "Apply to Editor" buttons.

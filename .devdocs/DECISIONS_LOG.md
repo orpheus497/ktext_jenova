@@ -1,3 +1,13 @@
+**Timestamp**: 2026-07-24 10:45
+
+## UI: Throttled Streaming and Native Rendering
+* **Decision**: Added a 50ms QTimer to `ChatMessageWidget` to throttle UI updates during LLM generation and implemented `paintEvent` for native rounded corners instead of using QSS `border-radius`.
+* **Justification**: Updating complex markdown layouts on every single LLM token caused severe UI thread blocking and lag. Batching updates every 50ms resolves this. Native QPainter rendering avoids QSS bugs on KDevelop's varying dock themes.
+
+## Context: Expanded Token Limits
+* **Decision**: Increased the hardcoded truncation limits in `ContextManager` from 200 lines to 1000 lines for @file references, and from 50,000 characters to 120,000 characters for the active document.
+* **Justification**: Modern LLMs have large context windows. Restricting @file to 200 lines arbitrarily truncates essential code needed for accurate refactoring and chat responses.
+
 **Timestamp**: 2026-07-24 10:22
 
 ## UI: QScrollArea and Native KTextEditor Widgets

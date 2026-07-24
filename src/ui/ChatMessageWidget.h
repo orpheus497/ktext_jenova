@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QString>
+#include <QTimer>
+#include <QColor>
 
 class QVBoxLayout;
 class QLabel;
@@ -25,6 +27,10 @@ public:
 
     // ##Method purpose: Returns the role of this message.
     QString role() const { return m_role; }
+
+protected:
+    // ##Method purpose: Handles native bubble rendering safely without QSS interference.
+    void paintEvent(QPaintEvent *event) override;
 
 private Q_SLOTS:
     // ##Method purpose: Injects the code block into the active KDevelop text editor.
@@ -51,4 +57,7 @@ private:
     bool m_isStreaming;
     QVBoxLayout *m_layout;
     QLabel *m_streamingLabel; // Used exclusively during fast token generation.
+    QTimer *m_streamTimer;
+    QString m_pendingStreamToken;
+    QColor m_bgColor;
 };

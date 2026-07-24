@@ -1,5 +1,8 @@
 # Historical Session Summaries
 
+**Timestamp**: 2026-07-24 10:45
+* **Context Pipeline and Streaming Performance Fixes**: Resolved UI clipping and stream latency issues by switching markdown rendering to a throttled timer and implementing native QPainter rounded borders. Expanded LLM context capacities to 1000 lines for @file references and 120,000 characters for active documents.
+
 **Timestamp**: 2026-07-24 10:07
 * **Qt6 Enum Type Casting**: Fixed `invalid conversion from int to QTextDocument::MarkdownFeature` error in `ChatMessageDelegate.cpp` by wrapping combined flags in `QTextDocument::MarkdownFeatures(...)`.
 

@@ -230,7 +230,7 @@ QString ContextManager::buildSystemPrompt(KTextEditor::View *view) const
         prompt += QStringLiteral("\nCurrent file: ") % view->document()->url().toLocalFile() % QStringLiteral("\n") %
                   QStringLiteral("\n--- File Content ---\n```\n");
 
-        const int maxFileLength = 50000;
+        const int maxFileLength = 120000;
         prompt += getTruncatedDocumentText(view->document(), maxFileLength);
 
         prompt += QStringLiteral("\n```\n");
@@ -260,7 +260,7 @@ QString ContextManager::buildRefactorPrompt(const QString &instruction, const QS
         prompt += QStringLiteral("You are working in the file: ") % view->document()->url().toLocalFile() % QStringLiteral("\n\n") %
                   QStringLiteral("Here is the full content of the file for context:\n```\n");
 
-        const int maxFileLength = 50000;
+        const int maxFileLength = 120000;
         prompt += getTruncatedDocumentText(view->document(), maxFileLength);
 
         prompt += QStringLiteral("\n```\n\n");
@@ -313,8 +313,8 @@ QString ContextManager::extractRelevantFileContext(const QString &filePath) cons
         QTextStream in(&file);
         QString content;
         int lineCount = 0;
-        // ##Loop purpose: Read up to 200 lines as a fallback.
-        while (!in.atEnd() && lineCount < 200) {
+        // ##Loop purpose: Read up to 1000 lines as a fallback.
+        while (!in.atEnd() && lineCount < 1000) {
             content += in.readLine() % QStringLiteral("\n");
             ++lineCount;
         }

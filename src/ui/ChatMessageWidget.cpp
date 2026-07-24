@@ -9,6 +9,9 @@
 #include <QStyle>
 #include <QPalette>
 #include <QIcon>
+#include <QPainter>
+#include <QPaintEvent>
+#include <QTimer>
 #include <KTextEditor/Document>
 #include <KTextEditor/View>
 #include <KTextEditor/Editor>
@@ -18,7 +21,7 @@
 
 // ##Method purpose: Constructor.
 ChatMessageWidget::ChatMessageWidget(const QString& role, const QString& content, bool isStreaming, QWidget *parent)
-    : QWidget(parent), m_role(role), m_content(content), m_isStreaming(isStreaming)
+    : QWidget(parent), m_role(role), m_content(content), m_isStreaming(isStreaming), m_streamTimer(nullptr)
 {
     m_layout = new QVBoxLayout(this);
     m_layout->setContentsMargins(10, 10, 10, 10);
@@ -27,6 +30,16 @@ ChatMessageWidget::ChatMessageWidget(const QString& role, const QString& content
     applyRoleStyling();
     
     if (m_isStreaming) {
+        m_streamTimer = new QTimer(this);
+        m_streamTimer->setInterval(50);
+        connect(m_streamTimer, &QTimer::timeout, this, [this]() {
+            if (!m_pendingStreamToken.isEmpty()) {
+                m_content += m_pendingStreamToken;
+                m_pendingStreamToken.clear();
+                if (m_streamingLabel) m_streamingLabel->setText(m_content);
+            }
+        });
+        m_streamTimer->start();
         m_streamingLabel = new QLabel(this);
         m_streamingLabel->setWordWrap(true);
         m_streamingLabel->setTextFormat(Qt::MarkdownText);
@@ -38,43 +51,46 @@ ChatMessageWidget::ChatMessageWidget(const QString& role, const QString& content
     }
 }
 
+// ##Method purpose: Handles native bubble rendering safely without QSS interference.
+void ChatMessageWidget::paintEvent(QPaintEvent *event)
+{
+    Q_UNUSED(event);
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(m_bgColor);
+    painter.drawRoundedRect(rect(), 8, 8);
+}
+
 // ##Method purpose: Sets the background color based on the role.
 void ChatMessageWidget::applyRoleStyling()
 {
-    setAutoFillBackground(true);
     QPalette pal = palette();
     
-    QColor bgColor;
     if (m_role == QStringLiteral("user")) {
-        bgColor = pal.color(QPalette::Active, QPalette::Highlight);
+        m_bgColor = pal.color(QPalette::Active, QPalette::Highlight);
         pal.setColor(QPalette::WindowText, pal.color(QPalette::Active, QPalette::HighlightedText));
     } else if (m_role == QStringLiteral("assistant")) {
-        bgColor = pal.color(QPalette::Active, QPalette::AlternateBase);
+        m_bgColor = pal.color(QPalette::Active, QPalette::AlternateBase);
     } else if (m_role == QStringLiteral("error")) {
-        bgColor = QColor::fromHsl(0, 80, qBound(40, pal.color(QPalette::Active, QPalette::Window).lightness(), 200));
+        m_bgColor = QColor::fromHsl(0, 80, qBound(40, pal.color(QPalette::Active, QPalette::Window).lightness(), 200));
     } else if (m_role == QStringLiteral("warning")) {
-        bgColor = QColor::fromHsl(40, 80, qBound(40, pal.color(QPalette::Active, QPalette::Window).lightness(), 200));
+        m_bgColor = QColor::fromHsl(40, 80, qBound(40, pal.color(QPalette::Active, QPalette::Window).lightness(), 200));
     } else if (m_role == QStringLiteral("thinking")) {
         QColor highlight = pal.color(QPalette::Active, QPalette::Highlight);
-        bgColor = QColor::fromHsl(highlight.hslHue(), 40, qBound(60, pal.color(QPalette::Active, QPalette::Window).lightness() + 15, 220));
+        m_bgColor = QColor::fromHsl(highlight.hslHue(), 40, qBound(60, pal.color(QPalette::Active, QPalette::Window).lightness() + 15, 220));
     } else {
-        bgColor = pal.color(QPalette::Active, QPalette::Window);
+        m_bgColor = pal.color(QPalette::Active, QPalette::Window);
     }
     
-    pal.setColor(QPalette::Window, bgColor);
     setPalette(pal);
-    
-    // Add rounded corners via QSS since QWidget doesn't round automatically based on palette
-    QString qss = QStringLiteral("ChatMessageWidget { background-color: %1; border-radius: 8px; }").arg(bgColor.name());
-    setStyleSheet(qss);
 }
 
 // ##Method purpose: Fast append for SSE streaming (only updates a temporary text label).
 void ChatMessageWidget::appendStreamToken(const QString& token)
 {
     if (!m_isStreaming || !m_streamingLabel) return;
-    m_content += token;
-    m_streamingLabel->setText(m_content);
+    m_pendingStreamToken += token;
 }
 
 // ##Method purpose: Finalizes a stream, parsing the accumulated text into proper blocks.
@@ -82,6 +98,16 @@ void ChatMessageWidget::finalizeStream()
 {
     if (!m_isStreaming) return;
     m_isStreaming = false;
+    
+    if (m_streamTimer) {
+        m_streamTimer->stop();
+        m_streamTimer->deleteLater();
+        m_streamTimer = nullptr;
+    }
+    if (!m_pendingStreamToken.isEmpty()) {
+        m_content += m_pendingStreamToken;
+        m_pendingStreamToken.clear();
+    }
     
     if (m_streamingLabel) {
         m_layout->removeWidget(m_streamingLabel);
@@ -191,11 +217,9 @@ void ChatMessageWidget::buildCodeBlock(const QString& lang, const QString& code)
         }
         
         auto *view = doc->createView(this);
-        // Attempt to constrain height so it doesn't take up the whole screen
         int lines = doc->lines();
-        int estimatedHeight = qMax(80, qMin(400, lines * 18 + 20)); // Approximate line height
-        view->setMinimumHeight(estimatedHeight);
-        view->setMaximumHeight(estimatedHeight);
+        int viewHeight = qMax(80, lines * QFontMetrics(view->font()).lineSpacing() + 10);
+        view->setFixedHeight(viewHeight);
         
         m_layout->addWidget(view);
     } else {
@@ -222,6 +246,9 @@ void ChatMessageWidget::applyToEditor(const QString& code)
     auto *activeDoc = docCtrl->activeDocument();
     if (!activeDoc) return;
     auto *view = activeDoc->activeTextView();
+    if (!view && activeDoc->textDocument() && !activeDoc->textDocument()->views().isEmpty()) {
+        view = activeDoc->textDocument()->views().first();
+    }
     if (!view || !view->document()) return;
     
     auto *doc = view->document();
